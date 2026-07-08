@@ -134,11 +134,11 @@ function WeekEventCard({ event }: { event: CalendarEvent }) {
     <button
       type="button"
       onClick={() => openDay(event.date)}
-      className={`flex flex-col items-start gap-[8px] rounded-[6px] px-[10px] py-[8px] text-left transition-[filter] hover:brightness-95 ${CARD_FILL[event.color]}`}
+      className={`flex w-full min-w-0 flex-col items-start gap-[8px] overflow-hidden rounded-[6px] px-[10px] py-[8px] text-left transition-[filter] hover:brightness-95 ${CARD_FILL[event.color]}`}
     >
-      <div className="flex min-w-0 flex-col gap-[2px]">
+      <div className="flex w-full min-w-0 flex-col gap-[2px]">
         {event.startTime && (
-          <p className="text-[13px] font-semibold leading-[1.3] text-gray-1000">
+          <p className="truncate text-[13px] font-semibold leading-[1.3] text-gray-1000">
             {event.startTime}~{event.endTime}
           </p>
         )}
@@ -150,9 +150,9 @@ function WeekEventCard({ event }: { event: CalendarEvent }) {
       </div>
 
       {event.location && (
-        <div className="flex items-center gap-px text-gray-800">
-          <LocationIcon size={13} />
-          <span className="text-[13px] font-semibold leading-[1.3]">
+        <div className="flex w-full min-w-0 items-center gap-px text-gray-800">
+          <LocationIcon size={13} className="shrink-0" />
+          <span className="truncate text-[13px] font-semibold leading-[1.3]">
             {event.location}
           </span>
         </div>

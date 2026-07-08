@@ -135,7 +135,10 @@ function AgendaCard({ event }: { event: CalendarEvent }) {
     <article
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`flex items-stretch gap-[12px] rounded-[18px] px-[14px] py-[8px] transition-colors ${bg}`}
+      className={`flex items-stretch gap-[12px] rounded-[18px] py-[8px] pr-[14px] transition-colors ${
+        // 선(바) 일정은 왼쪽으로 조금 밀어 종일 일정과 시선을 맞춘다
+        isAllDay ? "pl-[14px]" : "pl-[6px]"
+      } ${bg}`}
     >
       {/* 좌측 색상 바 — 시간 일정만. 종일은 블록 전체가 색이라 바가 없다. */}
       {!isAllDay && (
