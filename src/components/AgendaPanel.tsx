@@ -31,10 +31,12 @@ const BAR: Record<EventColor, string> = {
 export default function AgendaPanel() {
   const { selectedDate } = useDayView();
 
-  // 선택된 날짜를 맨 앞에 두고, 기본 날짜에서 중복은 제거
-  const dates = selectedDate
-    ? [selectedDate, ...AGENDA_DATES.filter((d) => d !== selectedDate)]
-    : [...AGENDA_DATES];
+  // 선택한 날짜를 맨 위에 두고, 그 아래로 나머지 날짜를 시간순(오름차순)으로 정렬.
+  // ISO(YYYY-MM-DD) 문자열이라 사전순 정렬이 곧 시간순 정렬이다.
+  const rest = [...new Set<string>(AGENDA_DATES)]
+    .filter((d) => d !== selectedDate)
+    .sort();
+  const dates = selectedDate ? [selectedDate, ...rest] : rest;
 
   const [firstDate, ...restDates] = dates;
 
