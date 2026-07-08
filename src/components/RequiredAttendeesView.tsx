@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { WEEKDAYS } from "@/lib/calendar";
+import { PEOPLE } from "@/data/people";
 import { CheckIcon, SearchIcon, SendIcon, TrashIcon } from "./icons";
 
 interface RequiredAttendeesViewProps {
@@ -24,8 +25,8 @@ function formatHeaderDate(iso: string): string {
   return `${mm}.${dd} (${WEEKDAYS[d.getDay()]})`;
 }
 
-/* 검색 대상 전체 명단 (Figma 시안 기준 목업 데이터) */
-const DIRECTORY = ["이유정 (나)", "윤아현", "최찬욱", "조태수", "서현정", "조민아"];
+/* 검색 대상 전체 명단 — src/data/people.ts 에서 관리 */
+const DIRECTORY = PEOPLE;
 
 /* 좌측 카드 — 최근 필수 참석자 목록 (Figma 시안 기준 목업 데이터) */
 const RECENT = [
@@ -136,7 +137,7 @@ export default function RequiredAttendeesView({
                   {results.map((name) => (
                     <div
                       key={name}
-                      className="flex items-center justify-between px-[18px]"
+                      className="group flex items-center justify-between rounded-[12px] px-[18px] py-[2px] transition-colors hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-[11px]">
                         <span className="size-[36px] shrink-0 rounded-full bg-gray-600" />
@@ -147,7 +148,7 @@ export default function RequiredAttendeesView({
                       <button
                         type="button"
                         onClick={() => addParticipant(name)}
-                        className="flex h-[28px] w-[52px] items-center justify-center rounded-[12px] bg-white text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 transition-colors hover:bg-gray-100"
+                        className="flex h-[28px] w-[52px] items-center justify-center rounded-[12px] bg-white text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 opacity-0 transition-opacity group-hover:opacity-100"
                       >
                         추가
                       </button>
