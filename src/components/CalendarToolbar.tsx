@@ -180,8 +180,9 @@ export default function CalendarToolbar() {
         }}
       />
 
-      {/* 필수 참석자 일정 찾기 화면 */}
+      {/* 필수 참석자 일정 찾기 화면 — 진입할 때마다 초기 상태로 새로 마운트 */}
       <RequiredAttendeesView
+        key={attendeesData ? "attendees-open" : "attendees-closed"}
         open={attendeesData !== null}
         topic={attendeesData?.topic ?? ""}
         startDate={attendeesData?.startDate ?? ""}

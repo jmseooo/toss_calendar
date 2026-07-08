@@ -24,6 +24,9 @@ function formatHeaderDate(iso: string): string {
   return `${mm}.${dd} (${WEEKDAYS[d.getDay()]})`;
 }
 
+/* 검색 대상 전체 명단 (Figma 시안 기준 목업 데이터) */
+const DIRECTORY = ["이유정 (나)", "윤아현", "최찬욱", "조태수", "서현정", "조민아"];
+
 /* 좌측 카드 — 최근 필수 참석자 목록 (Figma 시안 기준 목업 데이터) */
 const RECENT = [
   { name: "이유정 (나)", host: true },
@@ -65,6 +68,21 @@ export default function RequiredAttendeesView({
     return init;
   });
 
+  // 선택된 필수 참석자 — 최초 진입 시 비어 있고, 좌측 목록에서 추가하면 채워진다.
+  const [participants, setParticipants] = useState<string[]>([]);
+  // 검색어 — 입력하면 검색 결과 시트가 뜬다.
+  const [query, setQuery] = useState("");
+
+  function addParticipant(name: string) {
+    setParticipants((prev) => (prev.includes(name) ? prev : [...prev, name]));
+  }
+
+  // 검색 결과 — 이미 추가한 참석자는 제외
+  const q = query.trim();
+  const results = q
+    ? DIRECTORY.filter((n) => n.includes(q) && !participants.includes(n))
+    : [];
+
   // Esc 로 닫기
   useEffect(() => {
     if (!open) return;
@@ -98,14 +116,46 @@ export default function RequiredAttendeesView({
         {/* ── 카드 2열 ── */}
         <div className="mt-[46px] flex gap-[28px]">
           {/* 좌측: 필수 참석자 검색 + 최근 목록 */}
-          <div className="h-[628px] w-[399px] shrink-0 rounded-[36px] bg-white/90 px-[30px] pt-[41px] shadow-card">
+          <div className="relative h-[628px] w-[399px] shrink-0 rounded-[36px] bg-white/90 px-[30px] pt-[41px] shadow-card">
             {/* 검색 바 */}
-            <div className="flex h-[42px] items-center justify-between rounded-[24px] bg-gray-100 pl-[18px] pr-[15px]">
-              <span className="text-[17px] font-medium leading-[1.6] tracking-[-0.5px] text-gray-600">
-                필수 참석자를 검색해보세요
-              </span>
-              <SearchIcon size={24} className="text-gray-600" />
+            <div className="flex h-[42px] items-center gap-[8px] rounded-[24px] bg-gray-100 pl-[18px] pr-[15px]">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="필수 참석자를 검색해보세요"
+                className="min-w-0 flex-1 bg-transparent text-[17px] font-medium leading-[1.6] tracking-[-0.5px] text-gray-1000 outline-none placeholder:text-gray-600"
+              />
+              <SearchIcon size={24} className="shrink-0 text-gray-600" />
             </div>
+
+            {/* 검색 결과 시트 — 검색어가 있을 때 검색 바 아래에 떠서 표시 */}
+            {results.length > 0 && (
+              <div className="absolute inset-x-[30px] top-[97px] z-10 overflow-hidden rounded-[20px] bg-white/[0.92] shadow-[0px_2px_40px_0px_rgba(0,0,0,0.18)]">
+                <div className="flex flex-col gap-[8px] px-[27px] py-[23px]">
+                  {results.map((name) => (
+                    <div
+                      key={name}
+                      className="flex items-center justify-between px-[18px]"
+                    >
+                      <div className="flex items-center gap-[11px]">
+                        <span className="size-[36px] shrink-0 rounded-full bg-gray-600" />
+                        <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
+                          {name}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addParticipant(name)}
+                        className="flex h-[28px] w-[52px] items-center justify-center rounded-[12px] bg-white text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 transition-colors hover:bg-gray-100"
+                      >
+                        추가
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* 최근 라벨 */}
             <p className="mt-[20px] pl-[20px] text-[13px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-700">
@@ -115,9 +165,11 @@ export default function RequiredAttendeesView({
             {/* 목록 */}
             <div className="mt-[11px] flex flex-col gap-[17px]">
               {RECENT.map((p, i) => (
-                <div
+                <button
                   key={`${p.name}-${i}`}
-                  className="flex items-center justify-between px-[18px]"
+                  type="button"
+                  onClick={() => addParticipant(p.name)}
+                  className="flex items-center justify-between rounded-[12px] px-[18px] py-[2px] transition-colors hover:bg-gray-100"
                 >
                   <div className="flex items-center gap-[11px]">
                     <span className="size-[36px] shrink-0 rounded-full bg-gray-600" />
@@ -130,29 +182,37 @@ export default function RequiredAttendeesView({
                       주최
                     </span>
                   )}
-                </div>
+                </button>
               ))}
             </div>
           </div>
 
           {/* 우측: 참석자별 가능/불가능 시간대 */}
-          <div className="h-[628px] w-[492px] shrink-0 overflow-hidden rounded-[36px] bg-white px-[32px] pt-[44px] shadow-card">
+          <div className="flex h-[628px] w-[492px] shrink-0 flex-col overflow-hidden rounded-[36px] bg-white px-[32px] pt-[44px] shadow-card">
             {/* 참석 라벨 + 참석자 탭 */}
             <div className="flex items-center gap-[10px] pl-[3px]">
               <span className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-700">
                 참석
               </span>
-              {["이유정 (나)", "서현정"].map((n) => (
+              {participants.map((n) => (
                 <span
                   key={n}
-                  className="flex h-[36px] w-[98px] items-center justify-center rounded-[6px] border border-gray-300 text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800"
+                  className="flex h-[36px] items-center justify-center rounded-[6px] border border-gray-300 px-[10px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800"
                 >
                   {n}
                 </span>
               ))}
             </div>
 
-            {/* 시간대 목록 */}
+            {participants.length === 0 ? (
+              /* 최초 진입 — 참석자 미선택 시 안내 문구 */
+              <div className="flex flex-1 items-center justify-center pb-[44px]">
+                <p className="text-[16px] font-medium leading-[1.6] tracking-[-0.5px] text-gray-600">
+                  참석자를 검색하면 빈 시간을 찾아드릴게요
+                </p>
+              </div>
+            ) : (
+            /* 시간대 목록 */
             <div className="mt-[20px] flex flex-col gap-[9px]">
               {SLOTS.map((slot) => {
                 if (slot.kind === "available") {
@@ -222,6 +282,7 @@ export default function RequiredAttendeesView({
                 );
               })}
             </div>
+            )}
           </div>
         </div>
 
