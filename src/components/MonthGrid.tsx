@@ -1,3 +1,5 @@
+"use client";
+
 import {
   buildMonthGrid,
   VIEW_YEAR,
@@ -8,6 +10,7 @@ import {
 } from "@/lib/calendar";
 import { eventsByDate } from "@/data/events";
 import EventChip from "./EventChip";
+import { useDayView } from "./DayViewContext";
 
 const MAX_VISIBLE = 2; // 칸에 최대로 보여줄 칩 개수
 
@@ -40,12 +43,22 @@ export default function MonthGrid() {
 }
 
 function DayCellView({ cell }: { cell: DayCell }) {
+  const { selectedDate, openDay } = useDayView();
+  const isSelected = selectedDate === cell.date;
   const dayEvents = eventsByDate(cell.date);
   const visible = dayEvents.slice(0, MAX_VISIBLE);
   const overflow = dayEvents.length - visible.length;
 
   return (
-    <div className="flex min-w-0 flex-col gap-[6px] border-t border-l border-gray-300 px-[6px] py-[10px] first:border-l-0 sm:px-[10px] [&:nth-child(7n+1)]:border-l-0">
+    <button
+      type="button"
+      onClick={() => openDay(cell.date)}
+      aria-label={`${cell.date} 일별 보기`}
+      aria-pressed={isSelected}
+      className={`flex min-w-0 flex-col gap-[6px] border-t border-l border-gray-300 px-[6px] py-[10px] text-left transition-colors first:border-l-0 hover:bg-gray-300/40 sm:px-[10px] [&:nth-child(7n+1)]:border-l-0 ${
+        isSelected ? "bg-carrot-200/60" : ""
+      }`}
+    >
       {/* 날짜 숫자 (오늘이면 오렌지 원형) */}
       <div className="flex h-[24px] items-center">
         {cell.isToday ? (
@@ -74,6 +87,6 @@ function DayCellView({ cell }: { cell: DayCell }) {
           </span>
         )}
       </div>
-    </div>
+    </button>
   );
 }
