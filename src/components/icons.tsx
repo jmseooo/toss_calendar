@@ -137,6 +137,39 @@ export function LocationIcon({ className, size = 20 }: IconProps) {
   );
 }
 
+/** 체크 표시 — Figma icon_check_regular */
+export function CheckIcon({ className, size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M5 12.5 10 17.5 19 6.5"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** 휴지통 (채움) — Figma icon_trash_fill */
+export function TrashIcon({ className, size = 24 }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M9 3a1 1 0 0 0-.95.68L7.72 5H4.5a1 1 0 1 0 0 2h.62l.86 12.07A2 2 0 0 0 7.97 21h8.06a2 2 0 0 0 1.99-1.93L18.88 7h.62a1 1 0 1 0 0-2h-3.22l-.33-1.32A1 1 0 0 0 15 3H9Zm1.2 6a.8.8 0 0 1 .8.8v6a.8.8 0 0 1-1.6 0v-6a.8.8 0 0 1 .8-.8Zm3.6 0a.8.8 0 0 1 .8.8v6a.8.8 0 0 1-1.6 0v-6a.8.8 0 0 1 .8-.8Z" />
+    </svg>
+  );
+}
+
+/** 보내기 (종이비행기, 채움) — Figma lets-icons:send-fill */
+export function SendIcon({ className, size = 30 }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M4.4 3.06a1.2 1.2 0 0 0-1.66 1.4l1.7 5.9a1 1 0 0 0 .8.71l7.3 1.18a.25.25 0 0 1 0 .49l-7.3 1.18a1 1 0 0 0-.8.71l-1.7 5.9a1.2 1.2 0 0 0 1.66 1.4l15.9-7.9a1.2 1.2 0 0 0 0-2.16l-15.9-7.9Z" />
+    </svg>
+  );
+}
+
 /** 월간(칸이 넓은) 뷰 토글 아이콘 — Figma ri:layout-2-fill */
 export function LayoutMonthIcon({ className, size = 24 }: IconProps) {
   return (

@@ -12,6 +12,7 @@ import { useMonthView } from "./MonthViewContext";
 import { useWeekView } from "./WeekViewContext";
 import { useViewMode } from "./ViewModeContext";
 import MeetingCreateModal from "./MeetingCreateModal";
+import RequiredAttendeesView from "./RequiredAttendeesView";
 import { yearMonthOf } from "@/lib/calendar";
 
 /**
@@ -31,6 +32,13 @@ export default function CalendarToolbar() {
 
   // "회의 생성" 모달 열림 상태
   const [meetingOpen, setMeetingOpen] = useState(false);
+
+  // 날짜 선택 후 진입하는 "필수 참석자 일정 찾기" 화면 데이터
+  const [attendeesData, setAttendeesData] = useState<{
+    topic: string;
+    startDate: string;
+    endDate: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -165,6 +173,24 @@ export default function CalendarToolbar() {
       <MeetingCreateModal
         open={meetingOpen}
         onClose={() => setMeetingOpen(false)}
+        onNext={(data) => {
+          // 날짜 선택 완료 → 모달 닫고 "필수 참석자 일정 찾기" 화면으로 진입
+          setMeetingOpen(false);
+          setAttendeesData(data);
+        }}
+      />
+
+      {/* 필수 참석자 일정 찾기 화면 */}
+      <RequiredAttendeesView
+        open={attendeesData !== null}
+        topic={attendeesData?.topic ?? ""}
+        startDate={attendeesData?.startDate ?? ""}
+        onBack={() => {
+          // 뒤로 → 회의 생성 모달로 복귀
+          setAttendeesData(null);
+          setMeetingOpen(true);
+        }}
+        onClose={() => setAttendeesData(null)}
       />
     </div>
   );
