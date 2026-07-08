@@ -20,9 +20,9 @@ export default function MonthGrid() {
   const cells = buildMonthGrid(VIEW_YEAR, VIEW_MONTH, TODAY);
 
   return (
-    <div className="flex min-h-[560px] flex-1 flex-col overflow-hidden rounded-[24px] bg-gray-00 shadow-card sm:rounded-[36px]">
-      {/* 요일 헤더 */}
-      <div className="grid grid-cols-7 px-[8px] pt-[15px] sm:px-[14px]">
+    <div className="flex flex-col overflow-hidden rounded-[24px] bg-gray-00 shadow-card sm:rounded-[36px]">
+      {/* 요일 헤더 — Figma: 라벨 y=15(h22) 뒤 11px 여백 → 그리드는 48px 지점부터 시작 */}
+      <div className="grid grid-cols-7 px-[8px] pt-[15px] pb-[11px] sm:px-[14px]">
         {WEEKDAYS.map((w) => (
           <div
             key={w}
@@ -33,8 +33,8 @@ export default function MonthGrid() {
         ))}
       </div>
 
-      {/* 6주 그리드 */}
-      <div className="grid flex-1 grid-cols-7 grid-rows-6">
+      {/* 6주 그리드 — Figma: 6행 × 각 128px 고정. minmax로 최소 128px 보장해 아래가 잘리지 않게 */}
+      <div className="grid grid-cols-7 grid-rows-[repeat(6,minmax(128px,1fr))]">
         {cells.map((cell) => (
           <DayCellView key={cell.date} cell={cell} />
         ))}

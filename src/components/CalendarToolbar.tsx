@@ -82,9 +82,9 @@ export default function CalendarToolbar() {
       {/* 일정 생성하기 */}
       <button
         type="button"
-        className="flex h-[57px] w-[183px] items-center justify-center gap-[10px] rounded-full bg-carrot-600 text-[18px] font-semibold text-gray-00 transition-colors hover:brightness-95"
+        className="flex h-[42px] w-[144px] items-center justify-center gap-[8px] rounded-full bg-carrot-600 text-[16px] font-semibold text-gray-00 transition-colors hover:brightness-95"
       >
-        <PlusIcon size={18} />
+        <PlusIcon size={16} />
         일정 생성하기
       </button>
     </div>
