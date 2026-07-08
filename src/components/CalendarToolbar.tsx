@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -10,6 +11,7 @@ import {
 import { useMonthView } from "./MonthViewContext";
 import { useWeekView } from "./WeekViewContext";
 import { useViewMode } from "./ViewModeContext";
+import MeetingCreateModal from "./MeetingCreateModal";
 import { yearMonthOf } from "@/lib/calendar";
 
 /**
@@ -22,6 +24,24 @@ export default function CalendarToolbar() {
   const { mode, setMode } = useViewMode();
   const monthView = useMonthView();
   const weekView = useWeekView();
+
+  // "일정 생성하기" 드롭다운 열림 상태 + 바깥 클릭 시 닫기
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // "회의 생성" 모달 열림 상태
+  const [meetingOpen, setMeetingOpen] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onPointerDown(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [menuOpen]);
 
   // 주간 모드에서는 기준 주(anchor)가 속한 연·월을 제목으로 쓰고,
   // 이동/오늘 동작도 주 단위로 전환한다. (그 외엔 월간 동작)
@@ -97,14 +117,55 @@ export default function CalendarToolbar() {
         </div>
       </div>
 
-      {/* 일정 생성하기 — 폭이 줄어도 줄바꿈 없이 같은 줄 유지, 크기만 소폭 축소 */}
-      <button
-        type="button"
-        className="flex h-[42px] w-[128px] shrink-0 items-center justify-center gap-[6px] whitespace-nowrap rounded-full bg-carrot-600 text-[15px] font-semibold text-gray-00 transition-colors hover:brightness-95 xl:w-[144px] xl:gap-[8px] xl:text-[16px]"
-      >
-        <PlusIcon size={16} />
-        일정 생성하기
-      </button>
+      {/* 일정 생성하기 — 클릭 시 아래로 드롭다운(일정 추가 / 회의 생성) */}
+      <div ref={menuRef} className="relative shrink-0">
+        <button
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((prev) => !prev)}
+          className="flex h-[42px] w-[128px] shrink-0 items-center justify-center gap-[6px] whitespace-nowrap rounded-full bg-carrot-600 text-[15px] font-semibold text-gray-00 transition-colors hover:brightness-95 xl:w-[144px] xl:gap-[8px] xl:text-[16px]"
+        >
+          <PlusIcon size={16} />
+          일정 생성하기
+        </button>
+
+        {menuOpen && (
+          <div
+            role="menu"
+            className="absolute right-0 top-[calc(100%+10px)] z-20 w-[183px] rounded-[20px] bg-[rgba(255,255,255,0.92)] py-[14px] shadow-[0px_2px_40px_0px_rgba(0,0,0,0.18)] backdrop-blur-[2px]"
+          >
+            {/* 일정 추가 — 비활성 */}
+            <button
+              type="button"
+              role="menuitem"
+              disabled
+              aria-disabled="true"
+              className="flex w-full cursor-not-allowed items-center justify-center px-[24px] py-[6px] text-center text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-400"
+            >
+              일정 추가
+            </button>
+            {/* 회의 생성 — 활성 */}
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                setMeetingOpen(true);
+              }}
+              className="flex w-full items-center justify-center px-[24px] py-[6px] text-center text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition-colors hover:bg-gray-300/60"
+            >
+              회의 생성
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 회의 생성 모달 */}
+      <MeetingCreateModal
+        open={meetingOpen}
+        onClose={() => setMeetingOpen(false)}
+      />
     </div>
   );
 }
