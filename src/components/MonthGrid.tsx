@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   buildMonthGrid,
   VIEW_YEAR,
@@ -45,19 +46,28 @@ export default function MonthGrid() {
 function DayCellView({ cell }: { cell: DayCell }) {
   const { selectedDate, openDay } = useDayView();
   const isSelected = selectedDate === cell.date;
+  const [hovered, setHovered] = useState(false);
   const dayEvents = eventsByDate(cell.date);
   const visible = dayEvents.slice(0, MAX_VISIBLE);
   const overflow = dayEvents.length - visible.length;
+
+  // 선택 > 호버 우선순위. 마우스 이동 이벤트로 커서를 올리는 즉시 반응한다.
+  // (CSS hover:는 터치 겸용 기기에서 @media(hover)에 걸려 탭해야 반응하는 문제가 있음)
+  const bg = isSelected
+    ? "bg-carrot-200/60"
+    : hovered
+      ? "bg-gray-300/40"
+      : "";
 
   return (
     <button
       type="button"
       onClick={() => openDay(cell.date)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       aria-label={`${cell.date} 일별 보기`}
       aria-pressed={isSelected}
-      className={`flex min-w-0 flex-col gap-[6px] border-t border-l border-gray-300 px-[6px] py-[10px] text-left transition-colors first:border-l-0 hover:bg-gray-300/40 sm:px-[10px] [&:nth-child(7n+1)]:border-l-0 ${
-        isSelected ? "bg-carrot-200/60" : ""
-      }`}
+      className={`flex min-w-0 flex-col gap-[6px] border-t border-l border-gray-300 px-[6px] py-[10px] text-left transition-colors first:border-l-0 sm:px-[10px] [&:nth-child(7n+1)]:border-l-0 ${bg}`}
     >
       {/* 날짜 숫자 (오늘이면 오렌지 원형) */}
       <div className="flex h-[24px] items-center">
