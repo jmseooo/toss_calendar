@@ -41,6 +41,28 @@
   --shadow-card: 0px 2px 40px 0px rgba(204, 204, 204, 0.22);
 }
 
+/* 월간 ↔ 주간 뷰 전환 — 살짝 떠오르며 페이드 인 */
+@keyframes view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-view-enter {
+  animation: view-enter 0.22s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-view-enter {
+    animation: none;
+  }
+}
+
 html,
 body {
   height: 100%;

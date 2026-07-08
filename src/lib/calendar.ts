@@ -64,11 +64,41 @@ export function buildMonthGrid(
   });
 }
 
+/**
+ * 특정 날짜가 속한 주(일요일 시작, 7칸) 그리드를 생성한다.
+ * @param refISO 기준 날짜 ISO (이 날짜가 포함된 주를 만든다)
+ * @param today 오늘 날짜 ISO 문자열
+ */
+export function buildWeekGrid(refISO: string, today: string): DayCell[] {
+  const ref = new Date(refISO + "T00:00:00");
+  const weekStart = new Date(ref);
+  weekStart.setDate(ref.getDate() - ref.getDay()); // 그 주의 일요일
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    const iso = toISODate(d);
+    return {
+      date: iso,
+      day: d.getDate(),
+      inMonth: true,
+      isToday: iso === today,
+      weekday: d.getDay(),
+    };
+  });
+}
+
 /** ISO 날짜에 일수를 더한다 */
 export function addDays(iso: string, n: number): string {
   const d = new Date(iso + "T00:00:00");
   d.setDate(d.getDate() + n);
   return toISODate(d);
+}
+
+/** ISO 날짜의 연도와 월(1부터 시작)을 반환한다 */
+export function yearMonthOf(iso: string): { year: number; month: number } {
+  const d = new Date(iso + "T00:00:00");
+  return { year: d.getFullYear(), month: d.getMonth() + 1 };
 }
 
 /** VIEW 월의 특정 일(day) → ISO 날짜 */
