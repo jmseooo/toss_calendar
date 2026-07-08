@@ -4,12 +4,14 @@ import { useState } from "react";
 import { LocationIcon } from "./icons";
 import { useDayView } from "./DayViewContext";
 import {
-  AGENDA_DATES,
   eventsByDate,
   type CalendarEvent,
   type EventColor,
 } from "@/data/events";
-import { formatAgendaHeading } from "@/lib/calendar";
+import { TODAY, addDays, formatAgendaHeading } from "@/lib/calendar";
+
+/** 아젠다에 보여줄 날짜 수 (선택한 날짜 1 + 다음 2일) */
+const AGENDA_DAY_COUNT = 3;
 
 /** 아젠다 카드 좌측 바 색상 (연한 -bar 토큰) — 시간 일정용 */
 const BAR: Record<EventColor, string> = {
@@ -41,12 +43,12 @@ const FILLED: Record<EventColor, string> = {
 export default function AgendaPanel() {
   const { selectedDate } = useDayView();
 
-  // 선택한 날짜를 맨 위에 두고, 그 아래로 나머지 날짜를 시간순(오름차순)으로 정렬.
-  // ISO(YYYY-MM-DD) 문자열이라 사전순 정렬이 곧 시간순 정렬이다.
-  const rest = [...new Set<string>(AGENDA_DATES)]
-    .filter((d) => d !== selectedDate)
-    .sort();
-  const dates = selectedDate ? [selectedDate, ...rest] : rest;
+  // 기준 날짜: 월간 그리드에서 고른 날짜, 없으면 오늘.
+  // 이 날짜를 맨 위에 두고 그 아래로 "다음 날짜"들을 하루씩 이어 붙인다.
+  const baseDate = selectedDate ?? TODAY;
+  const dates = Array.from({ length: AGENDA_DAY_COUNT }, (_, i) =>
+    addDays(baseDate, i),
+  );
 
   const [firstDate, ...restDates] = dates;
 

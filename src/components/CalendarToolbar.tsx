@@ -8,15 +8,16 @@ import {
   LayoutWeekIcon,
   PlusIcon,
 } from "./icons";
-import { VIEW_YEAR, VIEW_MONTH } from "@/lib/calendar";
+import { useMonthView } from "./MonthViewContext";
 
 /**
  * 캘린더 상단 툴바.
  * 제목 · 이전/다음 · 오늘 · 뷰 토글 · "일정 생성하기".
- * (현재는 시안 재현 단계라 이전/다음 등은 시각적 상태만 처리)
+ * 이전/다음 화살표와 "오늘" 버튼은 표시 중인 월을 실제로 바꾼다.
  */
 export default function CalendarToolbar() {
   const [view, setView] = useState<"month" | "week">("month");
+  const { year, month, goPrev, goNext, goToday } = useMonthView();
 
   return (
     <div className="flex w-full flex-wrap items-center justify-between gap-y-[12px]">
@@ -24,11 +25,12 @@ export default function CalendarToolbar() {
         {/* 월 제목 + 이동 화살표 */}
         <div className="flex items-center gap-[10px]">
           <h1 className="text-[24px] font-semibold leading-[1.6] text-gray-1000">
-            {VIEW_YEAR}년 {VIEW_MONTH}월
+            {year}년 {month}월
           </h1>
           <button
             type="button"
             aria-label="이전 달"
+            onClick={goPrev}
             className="text-gray-1000 transition-colors hover:text-carrot-600"
           >
             <ChevronLeftIcon size={24} />
@@ -36,6 +38,7 @@ export default function CalendarToolbar() {
           <button
             type="button"
             aria-label="다음 달"
+            onClick={goNext}
             className="text-gray-1000 transition-colors hover:text-carrot-600"
           >
             <ChevronRightIcon size={24} />
@@ -46,6 +49,7 @@ export default function CalendarToolbar() {
           {/* 오늘 버튼 */}
           <button
             type="button"
+            onClick={goToday}
             className="flex h-[38px] w-[72px] items-center justify-center rounded-full border border-gray-300 bg-gray-00 text-[16px] font-semibold leading-[1.6] text-gray-1000 shadow-card transition-colors hover:bg-gray-300/50"
           >
             오늘

@@ -3,8 +3,6 @@
 import { useState } from "react";
 import {
   buildMonthGrid,
-  VIEW_YEAR,
-  VIEW_MONTH,
   TODAY,
   WEEKDAYS,
   type DayCell,
@@ -12,12 +10,14 @@ import {
 import { eventsByDate } from "@/data/events";
 import EventChip from "./EventChip";
 import { useDayView } from "./DayViewContext";
+import { useMonthView } from "./MonthViewContext";
 
 const MAX_VISIBLE = 2; // 칸에 최대로 보여줄 칩 개수
 
 /** 월간 캘린더 카드 (요일 헤더 + 6주 그리드) */
 export default function MonthGrid() {
-  const cells = buildMonthGrid(VIEW_YEAR, VIEW_MONTH, TODAY);
+  const { year, month } = useMonthView();
+  const cells = buildMonthGrid(year, month, TODAY);
 
   return (
     <div className="flex flex-col overflow-hidden rounded-[18px] bg-gray-00 shadow-card">
