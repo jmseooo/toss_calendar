@@ -34,11 +34,11 @@ export default function CalendarToolbar() {
   const goToday = isWeek ? weekView.goToday : monthView.goToday;
 
   return (
-    <div className="flex w-full flex-wrap items-center justify-between gap-y-[12px]">
-      <div className="flex flex-wrap items-center gap-[18px] gap-y-[10px]">
+    <div className="flex min-h-[57px] w-full items-center justify-between gap-x-[12px]">
+      <div className="flex min-w-0 items-center gap-[10px] xl:gap-[18px]">
         {/* 월 제목 + 이동 화살표 */}
-        <div className="flex items-center gap-[10px]">
-          <h1 className="text-[24px] font-semibold leading-[1.6] text-gray-1000">
+        <div className="flex items-center gap-[6px] xl:gap-[10px]">
+          <h1 className="whitespace-nowrap text-[20px] font-semibold leading-[1.6] text-gray-1000 xl:text-[24px]">
             {year}년 {month}월
           </h1>
           <button
@@ -59,12 +59,12 @@ export default function CalendarToolbar() {
           </button>
         </div>
 
-        <div className="flex items-center gap-[18px]">
+        <div className="flex items-center gap-[10px] xl:gap-[18px]">
           {/* 오늘 버튼 */}
           <button
             type="button"
             onClick={goToday}
-            className="flex h-[38px] w-[72px] items-center justify-center rounded-full border border-gray-300 bg-gray-00 text-[16px] font-semibold leading-[1.6] text-gray-1000 shadow-card transition-colors hover:bg-gray-300/50"
+            className="flex h-[38px] w-[60px] shrink-0 items-center justify-center rounded-full border border-gray-300 bg-gray-00 text-[16px] font-semibold leading-[1.6] text-gray-1000 shadow-card transition-colors hover:bg-gray-300/50 xl:w-[72px]"
           >
             오늘
           </button>
@@ -97,10 +97,10 @@ export default function CalendarToolbar() {
         </div>
       </div>
 
-      {/* 일정 생성하기 */}
+      {/* 일정 생성하기 — 폭이 줄어도 줄바꿈 없이 같은 줄 유지, 크기만 소폭 축소 */}
       <button
         type="button"
-        className="flex h-[42px] w-[144px] items-center justify-center gap-[8px] rounded-full bg-carrot-600 text-[16px] font-semibold text-gray-00 transition-colors hover:brightness-95"
+        className="flex h-[42px] w-[128px] shrink-0 items-center justify-center gap-[6px] whitespace-nowrap rounded-full bg-carrot-600 text-[15px] font-semibold text-gray-00 transition-colors hover:brightness-95 xl:w-[144px] xl:gap-[8px] xl:text-[16px]"
       >
         <PlusIcon size={16} />
         일정 생성하기
