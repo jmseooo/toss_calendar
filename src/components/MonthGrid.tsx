@@ -20,7 +20,7 @@ export default function MonthGrid() {
   const cells = buildMonthGrid(VIEW_YEAR, VIEW_MONTH, TODAY);
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-[24px] bg-gray-00 shadow-card sm:rounded-[36px]">
+    <div className="flex flex-col overflow-hidden rounded-[18px] bg-gray-00 shadow-card">
       {/* 요일 헤더 — Figma: 라벨 y=15(h22) 뒤 11px 여백 → 그리드는 48px 지점부터 시작 */}
       <div className="grid grid-cols-7 px-[8px] pt-[15px] pb-[11px] sm:px-[14px]">
         {WEEKDAYS.map((w) => (

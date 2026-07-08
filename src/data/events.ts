@@ -43,6 +43,13 @@ const tomorrow = addDays(TODAY, 1);
 export const events: CalendarEvent[] = [
   // ── 오늘 (아젠다 + 월간 칩) ───────────────────────
   {
+    id: "t0",
+    date: today,
+    title: "전사 워크숍",
+    color: "teal",
+    chip: "filled", // 종일(블록) 일정
+  },
+  {
     id: "t1",
     date: today,
     title: "그룹A 리서치",

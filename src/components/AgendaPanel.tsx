@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { LocationIcon } from "./icons";
 import { useDayView } from "./DayViewContext";
 import {
@@ -10,13 +11,22 @@ import {
 } from "@/data/events";
 import { formatAgendaHeading } from "@/lib/calendar";
 
-/** 아젠다 카드 좌측 바 색상 (연한 -bar 토큰) */
+/** 아젠다 카드 좌측 바 색상 (연한 -bar 토큰) — 시간 일정용 */
 const BAR: Record<EventColor, string> = {
   blue: "bg-ev-blue-bar",
   pink: "bg-ev-pink-bar",
   purple: "bg-ev-purple-bar",
   red: "bg-ev-red-bar",
   teal: "bg-ev-teal-bar",
+};
+
+/** 종일(블록) 일정용 채운 배경 + 텍스트 색 — 월간 뷰의 filled 칩과 동일 */
+const FILLED: Record<EventColor, string> = {
+  blue: "bg-ev-blue-fill text-ev-blue",
+  pink: "bg-ev-pink-fill text-ev-pink",
+  purple: "bg-ev-purple-fill text-ev-purple",
+  red: "bg-ev-red-fill text-ev-red",
+  teal: "bg-ev-teal-fill text-ev-teal",
 };
 
 /**
@@ -77,10 +87,13 @@ function DayHeading({ date, active }: { date: string; active: boolean }) {
 
 /** 하루치 일정 카드(흰 카드 + 일정 목록) */
 function DayCardBody({ date }: { date: string }) {
-  const dayEvents = eventsByDate(date);
+  // 종일(블록) 일정을 맨 위로, 나머지(시간 일정)는 원래 순서 유지.
+  const dayEvents = [...eventsByDate(date)].sort(
+    (a, b) => (a.chip === "filled" ? 0 : 1) - (b.chip === "filled" ? 0 : 1),
+  );
 
   return (
-    <div className="flex flex-col gap-[12px] rounded-[30px] bg-gray-00 px-[19px] py-[21px] shadow-card">
+    <div className="flex flex-col gap-[8px] rounded-[18px] bg-gray-00 px-[19px] py-[21px] shadow-card">
       {dayEvents.length > 0 ? (
         dayEvents.map((event) => <AgendaCard key={event.id} event={event} />)
       ) : (
@@ -103,18 +116,45 @@ function DaySection({ date, active }: { date: string; active: boolean }) {
 }
 
 function AgendaCard({ event }: { event: CalendarEvent }) {
+  // 월간 뷰의 블록(filled) = 종일 일정. 아젠다에서도 채운 블록으로 표시한다.
+  const isAllDay = event.chip === "filled";
+  // 호버 시에만 옅은 회색 배경. 터치 겸용 기기에서도 커서에 바로 반응하도록
+  // CSS hover: 대신 마우스 이벤트로 직접 제어한다.
+  const [hovered, setHovered] = useState(false);
+
+  // 종일 카드는 이미 채운 블록이라 회색 호버를 덧입히지 않는다.
+  const bg = isAllDay
+    ? FILLED[event.color]
+    : hovered
+      ? "bg-gray-300/60"
+      : "";
+
   return (
-    <article className="flex items-stretch gap-[12px] rounded-[22px] px-[14px] py-[18px]">
-      {/* 좌측 색상 바 */}
-      <span className={`w-[4px] shrink-0 rounded-[6px] ${BAR[event.color]}`} />
+    <article
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={`flex items-stretch gap-[12px] rounded-[18px] px-[14px] py-[8px] transition-colors ${bg}`}
+    >
+      {/* 좌측 색상 바 — 시간 일정만. 종일은 블록 전체가 색이라 바가 없다. */}
+      {!isAllDay && (
+        <span className={`w-[4px] shrink-0 rounded-[6px] ${BAR[event.color]}`} />
+      )}
 
       <div className="flex min-w-0 flex-1 flex-col gap-[10px]">
-        {/* 시간 · 제목 */}
-        <div className="flex flex-col gap-[3px] font-semibold leading-[1.3] text-gray-1000">
-          {event.startTime && (
-            <p className="text-[14px]">
-              {event.startTime}~{event.endTime}
-            </p>
+        {/* 시간(또는 종일) · 제목 */}
+        <div
+          className={`flex flex-col gap-[3px] font-semibold leading-[1.3] ${
+            isAllDay ? "" : "text-gray-1000"
+          }`}
+        >
+          {isAllDay ? (
+            <p className="text-[14px]">종일</p>
+          ) : (
+            event.startTime && (
+              <p className="text-[14px]">
+                {event.startTime}~{event.endTime}
+              </p>
+            )
           )}
           <p className="text-[16px]">{event.title}</p>
         </div>
