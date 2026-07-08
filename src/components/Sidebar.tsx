@@ -10,7 +10,7 @@ export default function Sidebar() {
     <aside className="flex w-[85px] shrink-0 flex-col items-center border-r border-gray-400/40 bg-gray-00/70 pt-[23px]">
       {/* 로고 */}
       <Image
-        src="/logo.png"
+        src="/logo-v2.png"
         alt="로고"
         width={60}
         height={60}
