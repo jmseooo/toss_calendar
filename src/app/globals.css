@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/*
+ * 디자인 토큰 — Figma "2026_v2 포트폴리오 · 메인 뷰"
+ * 색상은 Figma 변수(Gray/*, Carrot/*)를 그대로 옮긴 값입니다.
+ */
+@theme {
+  --font-sans: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Gray scale */
+  --color-gray-1000: #1a1c20;
+  --color-gray-800: #555d6d;
+  --color-gray-700: #868b94;
+  --color-gray-600: #b0b3ba;
+  --color-gray-400: #dcdee3;
+  --color-gray-300: #eeeff1;
+  --color-gray-00: #ffffff;
+
+  /* Brand (Carrot) */
+  --color-carrot-600: #ff6600;
+  --color-carrot-200: #ffe8db;
+
+  /* 이벤트 강조색 — 텍스트 / 채움 배경 / 좌측 바 */
+  --color-ev-blue: #007fe6;
+  --color-ev-blue-fill: #cceeff;
+  --color-ev-blue-bar: #a6d7ff;
+  --color-ev-pink: #ff30a4;
+  --color-ev-pink-fill: #ffd6ed;
+  --color-ev-pink-bar: #ffc0e3;
+  --color-ev-purple: #9b51e0;
+  --color-ev-purple-fill: #f2e6ff;
+  --color-ev-purple-bar: #e8c9ff;
+  --color-ev-red: #fb5c5c;
+  --color-ev-red-fill: #ffe0e0;
+  --color-ev-red-bar: #ffc2c2;
+  --color-ev-teal: #12b886;
+  --color-ev-teal-fill: #d3f9ec;
+  --color-ev-teal-bar: #a6ecd4;
+
+  /* 그림자 (Figma effect: sh) */
+  --shadow-card: 0px 2px 40px 0px rgba(204, 204, 204, 0.22);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  /* Figma 배경 그라디언트 */
+  background: linear-gradient(153.4deg, #f7f8f9 20.66%, #ffffff 107.27%);
+  background-attachment: fixed;
+  color: var(--color-gray-1000);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.5px;
+}
