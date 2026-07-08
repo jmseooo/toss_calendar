@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { WEEKDAYS } from "@/lib/calendar";
 import { PEOPLE } from "@/data/people";
+import { buildDaySlots } from "@/data/schedules";
 import { CheckIcon, SearchIcon, SendIcon, TrashIcon } from "./icons";
 
 interface RequiredAttendeesViewProps {
@@ -37,17 +38,8 @@ const RECENT = [
   { name: "조태수", host: false },
 ];
 
-/* 우측 카드 — 시간대 후보 (Figma 시안 기준 목업 데이터) */
-type Slot =
-  | { id: string; kind: "available"; time: string }
-  | { id: string; kind: "blocked"; time: string; names: string[] };
-
-const SLOTS: Slot[] = [
-  { id: "s1", kind: "available", time: "11:00~12:00" },
-  { id: "s2", kind: "available", time: "13:00~14:00" },
-  { id: "s3", kind: "blocked", time: "13:00~14:00", names: ["서현정", "조민아", "윤아"] },
-  { id: "s4", kind: "blocked", time: "19:00~20:00", names: ["서현정", "조민아", "윤아"] },
-];
+/* 불가능 카드에서 이름 칩을 최대 몇 개까지 노출할지 (나머지는 "+N") */
+const MAX_BLOCKED_CHIPS = 6;
 
 /**
  * "필수 참석자 일정 찾기" 화면.
@@ -62,17 +54,27 @@ export default function RequiredAttendeesView({
   onBack,
   onClose,
 }: RequiredAttendeesViewProps) {
-  // "모두 가능" 슬롯의 체크 상태 (기본 모두 선택)
-  const [checked, setChecked] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = {};
-    for (const s of SLOTS) if (s.kind === "available") init[s.id] = true;
-    return init;
-  });
-
   // 선택된 필수 참석자 — 최초 진입 시 비어 있고, 좌측 목록에서 추가하면 채워진다.
   const [participants, setParticipants] = useState<string[]>([]);
   // 검색어 — 입력하면 검색 결과 시트가 뜬다.
   const [query, setQuery] = useState("");
+  // 사용자가 해제한 "모두 가능" 시간대 (기본은 모두 선택 상태)
+  const [uncheckedHours, setUncheckedHours] = useState<Set<number>>(() => new Set());
+
+  // 선택 참석자 + 날짜 → 시간대별 가능/불가능 계산
+  const slots = useMemo(
+    () => buildDaySlots(participants, startDate),
+    [participants, startDate],
+  );
+
+  function toggleHour(hour: number) {
+    setUncheckedHours((prev) => {
+      const next = new Set(prev);
+      if (next.has(hour)) next.delete(hour);
+      else next.add(hour);
+      return next;
+    });
+  }
 
   function addParticipant(name: string) {
     setParticipants((prev) => (prev.includes(name) ? prev : [...prev, name]));
@@ -213,18 +215,16 @@ export default function RequiredAttendeesView({
                 </p>
               </div>
             ) : (
-            /* 시간대 목록 */
-            <div className="mt-[20px] flex flex-col gap-[9px]">
-              {SLOTS.map((slot) => {
-                if (slot.kind === "available") {
-                  const isOn = checked[slot.id];
+            /* 시간대 목록 — 선택 참석자들의 실제 일정으로 계산 */
+            <div className="mt-[20px] flex flex-1 flex-col gap-[9px] overflow-y-auto pb-[44px] pr-[4px]">
+              {slots.map((slot) => {
+                if (slot.blockedBy.length === 0) {
+                  const isOn = !uncheckedHours.has(slot.hour);
                   return (
-                    <div key={slot.id} className="group flex items-center gap-[12px]">
+                    <div key={slot.hour} className="group flex shrink-0 items-center gap-[12px]">
                       <button
                         type="button"
-                        onClick={() =>
-                          setChecked((c) => ({ ...c, [slot.id]: !c[slot.id] }))
-                        }
+                        onClick={() => toggleHour(slot.hour)}
                         aria-pressed={isOn}
                         className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] transition-colors ${
                           isOn ? "bg-[#6373ff] text-white" : "bg-gray-200 text-transparent"
@@ -254,29 +254,37 @@ export default function RequiredAttendeesView({
                     </div>
                   );
                 }
+                const shown = slot.blockedBy.slice(0, MAX_BLOCKED_CHIPS);
+                const extra = slot.blockedBy.length - shown.length;
                 return (
-                  <div key={slot.id} className="flex items-center gap-[12px]">
+                  <div key={slot.hour} className="flex shrink-0 items-start gap-[12px]">
                     <span className="flex size-[33px] shrink-0 items-center justify-center rounded-[8px] bg-gray-200 text-gray-600">
                       <CheckIcon size={18} />
                     </span>
                     <div className="flex flex-1 flex-col gap-[10px] rounded-[22px] border border-gray-400 px-[24px] py-[18px]">
                       <div className="flex flex-col gap-[3px]">
                         <span className="text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
-                          불가능 {slot.names.length}명
+                          불가능 {slot.blockedBy.length}명
                         </span>
                         <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
                           {slot.time}
                         </span>
                       </div>
-                      <div className="flex gap-[10px]">
-                        {slot.names.map((n, i) => (
+                      <div className="flex flex-wrap gap-[10px]">
+                        {shown.map((p, i) => (
                           <span
-                            key={`${n}-${i}`}
-                            className="flex w-[71px] items-center justify-center rounded-[6px] border border-dashed border-[#ff8c8c] px-[4px] py-[6px] text-[14px] font-medium leading-[1.3] tracking-[-0.5px] text-gray-800"
+                            key={`${p.name}-${i}`}
+                            title={p.title}
+                            className="flex min-w-[71px] items-center justify-center rounded-[6px] border border-dashed border-[#ff8c8c] px-[8px] py-[6px] text-[14px] font-medium leading-[1.3] tracking-[-0.5px] text-gray-800"
                           >
-                            {n}
+                            {p.name}
                           </span>
                         ))}
+                        {extra > 0 && (
+                          <span className="flex min-w-[71px] items-center justify-center rounded-[6px] border border-dashed border-[#ff8c8c] px-[8px] py-[6px] text-[14px] font-medium leading-[1.3] tracking-[-0.5px] text-gray-600">
+                            +{extra}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
