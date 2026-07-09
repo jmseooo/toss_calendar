@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { WEEKDAYS } from "@/lib/calendar";
-import { PEOPLE } from "@/data/people";
+import { PEOPLE, SELF } from "@/data/people";
 import { buildDaySlots } from "@/data/schedules";
 import { CheckIcon, CloseIcon, SearchIcon, SendIcon, TrashIcon } from "./icons";
 
@@ -29,14 +29,9 @@ function formatHeaderDate(iso: string): string {
 /* 검색 대상 전체 명단 — src/data/people.ts 에서 관리 */
 const DIRECTORY = PEOPLE;
 
-/* 좌측 카드 — 최근 필수 참석자 목록 (Figma 시안 기준 목업 데이터) */
-const RECENT = [
-  { name: "이유정 (나)", host: true },
-  { name: "윤아현", host: false },
-  { name: "최찬욱", host: false },
-  { name: "윤아현", host: false },
-  { name: "조태수", host: false },
-];
+/* 좌측 카드 — "최근" 초기 목록. 실제 명단(PEOPLE)에 있는 이름만 사용하며,
+   검색해서 참석자를 추가하면 그 사람이 이 목록 맨 앞에 쌓인다. */
+const INITIAL_RECENT: string[] = [SELF, "김민준", "이서연", "박지훈", "최수빈"];
 
 /* 불가능 카드에서 이름 칩을 최대 몇 개까지 노출할지 (나머지는 "+N") */
 const MAX_BLOCKED_CHIPS = 6;
@@ -56,6 +51,8 @@ export default function RequiredAttendeesView({
 }: RequiredAttendeesViewProps) {
   // 선택된 필수 참석자 — 최초 진입 시 비어 있고, 좌측 목록에서 추가하면 채워진다.
   const [participants, setParticipants] = useState<string[]>([]);
+  // "최근" 목록 — 참석자를 추가하면 그 사람이 맨 앞으로 온다.
+  const [recent, setRecent] = useState<string[]>(INITIAL_RECENT);
   // 검색어 — 입력하면 검색 결과 시트가 뜬다.
   const [query, setQuery] = useState("");
   // 체크된 시간대 (기본은 표시된 가능 시간대 중 처음 2개)
@@ -64,6 +61,8 @@ export default function RequiredAttendeesView({
   const [hoveredHour, setHoveredHour] = useState<number | null>(null);
   // 사용자가 trash로 삭제한 시간대 — 목록에서 제외
   const [deletedHours, setDeletedHours] = useState<Set<number>>(() => new Set());
+  // "선택 날짜 초대 보내기"를 누르면 전송 완료 화면으로 전환
+  const [sent, setSent] = useState(false);
 
   // 선택 참석자 + 날짜 → 시간대별 가능/불가능 계산
   const slots = useMemo(
@@ -111,6 +110,8 @@ export default function RequiredAttendeesView({
 
   function addParticipant(name: string) {
     setParticipants((prev) => (prev.includes(name) ? prev : [...prev, name]));
+    // 방금 추가한 사람을 "최근" 맨 앞으로 (중복 제거)
+    setRecent((prev) => [name, ...prev.filter((n) => n !== name)]);
   }
 
   function removeParticipant(name: string) {
@@ -136,6 +137,68 @@ export default function RequiredAttendeesView({
   if (!open) return null;
 
   const title = topic.trim() || "회의";
+
+  // ── 전송 완료 화면 (Figma 243:7319) — 실제 참석자·주제·날짜로 채움 ──
+  if (sent) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-auto px-[24px] py-[40px]"
+        style={{ background: "radial-gradient(120% 80% at 50% -10%, #ffe9dd 0%, #ffffff 55%)" }}
+      >
+        <div className="flex size-[46px] items-center justify-center rounded-full bg-[#ff9364] text-white">
+          <CheckIcon size={26} />
+        </div>
+        <p className="mt-[12px] text-[22px] font-medium leading-[1.6] tracking-[-0.5px] text-gray-800">
+          필수 참석자 {participants.length}명에게
+        </p>
+        <h1 className="mt-[4px] text-[33px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-1000">
+          회의 초대 전송 완료!
+        </h1>
+
+        <div className="mt-[36px] flex w-[738px] max-w-full flex-col items-center gap-[20px] rounded-[30px] bg-white px-[40px] py-[36px] shadow-card">
+          <div className="flex items-center gap-[10px]">
+            <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-600">
+              {title}
+            </span>
+            <span className="size-[6px] rounded-full bg-[#cfd4dd]" />
+            <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-600">
+              {formatHeaderDate(startDate)}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-[12px]">
+            {participants.map((n) => (
+              <div
+                key={n}
+                className="flex items-center gap-[11px] rounded-[18px] border border-gray-400 bg-white/[0.66] p-[12px]"
+              >
+                <span className="size-[36px] shrink-0 rounded-full bg-gray-600" />
+                <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
+                  {n}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div
+            className="flex h-[124px] w-full max-w-[628px] flex-col items-center justify-center gap-[6px] rounded-[30px] px-[24px] text-center text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-[#471601]"
+            style={{ backgroundImage: "linear-gradient(98.95deg, #ffe8db 1.5%, #fff8dd 96.5%)" }}
+          >
+            <p>참석자들은 선호를 반영해 괜찮은 시간을 선택할거예요.</p>
+            <p>답변이 오면 바로 알려드릴게요.</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-[30px] flex h-[57px] w-[136px] items-center justify-center rounded-[18px] bg-[#2a3038] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition-colors hover:brightness-110"
+        >
+          홈으로
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -212,20 +275,20 @@ export default function RequiredAttendeesView({
 
             {/* 목록 */}
             <div className="mt-[11px] flex flex-col gap-[17px]">
-              {RECENT.map((p, i) => (
+              {recent.map((name) => (
                 <div
-                  key={`${p.name}-${i}`}
+                  key={name}
                   className="group flex items-center justify-between rounded-[12px] px-[18px] py-[6px] transition-colors hover:bg-[#f7f8f9]"
                 >
                   <div className="flex items-center gap-[11px]">
                     <span className="size-[36px] shrink-0 rounded-full bg-gray-600" />
                     <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
-                      {p.name}
+                      {name}
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => addParticipant(p.name)}
+                    onClick={() => addParticipant(name)}
                     className="flex h-[28px] w-[52px] items-center justify-center rounded-[12px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 opacity-0 transition-opacity group-hover:opacity-100"
                   >
                     추가
@@ -393,7 +456,7 @@ export default function RequiredAttendeesView({
           </button>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => setSent(true)}
             className="flex h-[57px] w-[232px] items-center justify-center gap-[8px] rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition-colors hover:brightness-95"
           >
             선택 날짜 초대 보내기
