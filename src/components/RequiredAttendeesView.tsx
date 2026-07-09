@@ -117,7 +117,7 @@ export default function RequiredAttendeesView({
         </p>
 
         {/* ── 카드 2열 ── */}
-        <div className="mt-[46px] flex gap-[28px]">
+        <div className="mt-[36px] flex gap-[28px]">
           {/* 좌측: 필수 참석자 검색 + 최근 목록 */}
           <div className="relative h-[628px] w-[399px] shrink-0 rounded-[36px] bg-white/90 px-[30px] pt-[41px] shadow-card">
             {/* 검색 바 */}

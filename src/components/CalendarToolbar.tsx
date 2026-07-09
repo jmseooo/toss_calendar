@@ -141,7 +141,7 @@ export default function CalendarToolbar() {
         {menuOpen && (
           <div
             role="menu"
-            className="absolute right-0 top-[calc(100%+10px)] z-20 w-[183px] rounded-[20px] bg-[rgba(255,255,255,0.92)] py-[14px] shadow-[0px_2px_40px_0px_rgba(0,0,0,0.18)] backdrop-blur-[2px]"
+            className="absolute right-0 top-[calc(100%+10px)] z-20 w-[183px] rounded-[20px] bg-[rgba(255,255,255,0.92)] px-[10px] py-[14px] shadow-[0px_2px_40px_0px_rgba(0,0,0,0.18)] backdrop-blur-[2px]"
           >
             {/* 일정 추가 — 비활성 */}
             <button
@@ -161,7 +161,7 @@ export default function CalendarToolbar() {
                 setMenuOpen(false);
                 setMeetingOpen(true);
               }}
-              className="flex w-full items-center justify-center px-[24px] py-[6px] text-center text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition-colors hover:bg-gray-300/60"
+              className="flex w-full items-center justify-center rounded-[12px] px-[14px] py-[6px] text-center text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition-colors hover:bg-gray-300/60"
             >
               회의 생성
             </button>
