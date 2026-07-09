@@ -19,6 +19,13 @@
 export const DAY_START_HOUR = 9;
 export const DAY_END_HOUR = 21; // 마지막 슬롯 시작은 20시 (20:00~21:00)
 
+/**
+ * 항상 비워 두는 "공용 여유 시간" — 참석자가 아무리 많아도 이 시각엔 누구도 일정을 잡지 않는다.
+ * 덕분에 인원이 늘어도 "모두 가능" 시간이 최소 2개는 항상 남는다.
+ * (허브가 쓰지 않는 시각 11·16시를 예약)
+ */
+const ALWAYS_FREE_HOURS = new Set<number>([11, 16]);
+
 /** 요일 반복 그룹 일정(허브) — weekday: 0=일 ~ 6=토 */
 const HUBS: { title: string; weekday: number; hour: number }[] = [
   { title: "팀 정기 회의", weekday: 1, hour: 9 },
@@ -83,18 +90,20 @@ export function busyHoursFor(name: string, date: string): Map<number, string> {
   const map = new Map<number, string>();
   const weekday = new Date(date + "T00:00:00").getDay();
 
-  // 1) 허브(요일 반복 그룹 일정)
+  // 1) 허브(요일 반복 그룹 일정) — 공용 여유 시간은 제외
   for (const hi of hubMembership(name)) {
     const hub = HUBS[hi];
-    if (hub.weekday === weekday) map.set(hub.hour, hub.title);
+    if (hub.weekday === weekday && !ALWAYS_FREE_HOURS.has(hub.hour)) {
+      map.set(hub.hour, hub.title);
+    }
   }
 
-  // 2) 개인 랜덤 일정 1~3개
+  // 2) 개인 랜덤 일정 1~3개 — 공용 여유 시간은 비워 둔다
   const rnd = mulberry32(hashStr("day|" + name + "|" + date));
   const count = 1 + Math.floor(rnd() * 3);
   for (let k = 0; k < count; k++) {
     const hour = DAY_START_HOUR + Math.floor(rnd() * (DAY_END_HOUR - DAY_START_HOUR));
-    if (!map.has(hour)) {
+    if (!ALWAYS_FREE_HOURS.has(hour) && !map.has(hour)) {
       map.set(hour, PERSONAL_TITLES[Math.floor(rnd() * PERSONAL_TITLES.length)]);
     }
   }
