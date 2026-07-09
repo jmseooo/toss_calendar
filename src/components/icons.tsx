@@ -129,6 +129,20 @@ export function PlusIcon({ className, size = 18 }: IconProps) {
   );
 }
 
+/** X (닫기/삭제) */
+export function CloseIcon({ className, size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M6 6l12 12M18 6L6 18"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function LocationIcon({ className, size = 20 }: IconProps) {
   return (
     <svg {...base(size)} className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>

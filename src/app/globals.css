@@ -57,8 +57,26 @@
   animation: view-enter 0.22s ease-out both;
 }
 
+/* 일정 도출 — 시간대 카드가 위에서부터 펼쳐지며 순차로 나타남 (stagger) */
+@keyframes slot-unfold {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scaleY(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+.animate-slot-unfold {
+  transform-origin: top center;
+  animation: slot-unfold 0.32s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-view-enter {
+  .animate-view-enter,
+  .animate-slot-unfold {
     animation: none;
   }
 }

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { WEEKDAYS } from "@/lib/calendar";
 import { PEOPLE } from "@/data/people";
 import { buildDaySlots } from "@/data/schedules";
-import { CheckIcon, SearchIcon, SendIcon, TrashIcon } from "./icons";
+import { CheckIcon, CloseIcon, SearchIcon, SendIcon, TrashIcon } from "./icons";
 
 interface RequiredAttendeesViewProps {
   open: boolean;
@@ -58,8 +58,12 @@ export default function RequiredAttendeesView({
   const [participants, setParticipants] = useState<string[]>([]);
   // 검색어 — 입력하면 검색 결과 시트가 뜬다.
   const [query, setQuery] = useState("");
-  // 사용자가 해제한 "모두 가능" 시간대 (기본은 모두 선택 상태)
-  const [uncheckedHours, setUncheckedHours] = useState<Set<number>>(() => new Set());
+  // 체크된 시간대 (기본은 표시된 가능 시간대 중 처음 2개)
+  const [checkedHours, setCheckedHours] = useState<Set<number>>(() => new Set());
+  // 현재 마우스가 올라간 시간대 행 — 삭제(trash) 아이콘 노출 제어 (CSS group-hover 대신 JS로 확실히 제어)
+  const [hoveredHour, setHoveredHour] = useState<number | null>(null);
+  // 사용자가 trash로 삭제한 시간대 — 목록에서 제외
+  const [deletedHours, setDeletedHours] = useState<Set<number>>(() => new Set());
 
   // 선택 참석자 + 날짜 → 시간대별 가능/불가능 계산
   const slots = useMemo(
@@ -67,8 +71,31 @@ export default function RequiredAttendeesView({
     [participants, startDate],
   );
 
+  // 삭제한 시간대는 제외하고, 참석자가 1명일 땐 불가능 시간대는 숨김.
+  // 그 외에는 가능 시간대를 위로, 불가능 시간대를 아래로 정렬(각 그룹 내 시간 순 유지).
+  const visibleSlots = useMemo(() => {
+    const shown = slots.filter(
+      (slot) =>
+        !deletedHours.has(slot.hour) &&
+        (participants.length === 1 ? slot.blockedBy.length === 0 : true),
+    );
+    const available = shown.filter((slot) => slot.blockedBy.length === 0);
+    const blocked = shown.filter((slot) => slot.blockedBy.length > 0);
+    return [...available, ...blocked];
+  }, [slots, participants.length, deletedHours]);
+
+  // 기본 체크: 참석자/날짜가 바뀔 때 가능 시간대 중 처음 2개를 선택 상태로 초기화
+  // (삭제로 인한 목록 변화에는 체크가 리셋되지 않도록 slots 기준으로만 초기화)
+  useEffect(() => {
+    const defaults = slots
+      .filter((slot) => slot.blockedBy.length === 0)
+      .slice(0, 2)
+      .map((slot) => slot.hour);
+    setCheckedHours(new Set(defaults));
+  }, [slots]);
+
   function toggleHour(hour: number) {
-    setUncheckedHours((prev) => {
+    setCheckedHours((prev) => {
       const next = new Set(prev);
       if (next.has(hour)) next.delete(hour);
       else next.add(hour);
@@ -76,8 +103,18 @@ export default function RequiredAttendeesView({
     });
   }
 
+  // trash 클릭 → 해당 시간대를 목록에서 삭제
+  function deleteHour(hour: number) {
+    setDeletedHours((prev) => new Set(prev).add(hour));
+    setHoveredHour((h) => (h === hour ? null : h));
+  }
+
   function addParticipant(name: string) {
     setParticipants((prev) => (prev.includes(name) ? prev : [...prev, name]));
+  }
+
+  function removeParticipant(name: string) {
+    setParticipants((prev) => prev.filter((n) => n !== name));
   }
 
   // 검색 결과 — 이미 추가한 참석자는 제외
@@ -101,7 +138,15 @@ export default function RequiredAttendeesView({
   const title = topic.trim() || "회의";
 
   return (
-    <div className="fixed inset-0 z-50 overflow-auto bg-gradient-to-b from-white to-[#ffefe4]">
+    <div
+      className="fixed inset-0 z-50 overflow-auto bg-gradient-to-b from-white to-[#ffefe4]"
+      onMouseMove={(e) => {
+        // 화면 어디로 움직이든 커서 밑의 시간대 행을 다시 계산 → 커서를 떼면 trash가 확실히 사라짐
+        const row = (e.target as HTMLElement).closest("[data-hour]");
+        setHoveredHour(row ? Number((row as HTMLElement).dataset.hour) : null);
+      }}
+      onMouseLeave={() => setHoveredHour(null)}
+    >
       <div className="mx-auto flex min-h-full w-[919px] flex-col px-2 py-[80px]">
         {/* ── 헤더 ── */}
         <div className="flex items-center gap-[8px] text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
@@ -134,7 +179,7 @@ export default function RequiredAttendeesView({
 
             {/* 검색 결과 시트 — 검색어가 있을 때 검색 바 아래에 떠서 표시 */}
             {results.length > 0 && (
-              <div className="absolute inset-x-[30px] top-[97px] z-10 overflow-hidden rounded-[20px] bg-white/[0.92] shadow-[0px_2px_40px_0px_rgba(0,0,0,0.18)]">
+              <div className="absolute inset-x-[30px] top-[97px] z-10 overflow-hidden rounded-[20px] bg-white shadow-[0px_2px_40px_0px_rgba(0,0,0,0.18)]">
                 <div className="flex flex-col gap-[8px] px-[27px] py-[23px]">
                   {results.map((name) => (
                     <div
@@ -193,16 +238,24 @@ export default function RequiredAttendeesView({
           {/* 우측: 참석자별 가능/불가능 시간대 */}
           <div className="flex h-[628px] w-[492px] shrink-0 flex-col overflow-hidden rounded-[36px] bg-white px-[32px] pt-[44px] shadow-card">
             {/* 참석 라벨 + 참석자 탭 */}
-            <div className="flex items-center gap-[10px] pl-[3px]">
+            <div className="flex flex-wrap items-center gap-[10px] pl-[3px]">
               <span className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-700">
                 참석
               </span>
               {participants.map((n) => (
                 <span
                   key={n}
-                  className="flex h-[36px] items-center justify-center rounded-[6px] border border-gray-300 px-[10px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800"
+                  className="flex h-[36px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-[6px] border border-gray-300 pl-[10px] pr-[7px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800"
                 >
                   {n}
+                  <button
+                    type="button"
+                    onClick={() => removeParticipant(n)}
+                    aria-label={`${n} 삭제`}
+                    className="shrink-0 text-gray-500 transition-colors hover:text-gray-800"
+                  >
+                    <CloseIcon size={14} />
+                  </button>
                 </span>
               ))}
             </div>
@@ -217,11 +270,16 @@ export default function RequiredAttendeesView({
             ) : (
             /* 시간대 목록 — 선택 참석자들의 실제 일정으로 계산 */
             <div className="mt-[20px] flex flex-1 flex-col gap-[9px] overflow-y-auto pb-[44px] pr-[4px]">
-              {slots.map((slot) => {
+              {visibleSlots.map((slot, index) => {
                 if (slot.blockedBy.length === 0) {
-                  const isOn = !uncheckedHours.has(slot.hour);
+                  const isOn = checkedHours.has(slot.hour);
                   return (
-                    <div key={slot.hour} className="group flex shrink-0 items-center gap-[12px]">
+                    <div
+                      key={slot.hour}
+                      data-hour={slot.hour}
+                      style={{ animationDelay: `${index * 45}ms` }}
+                      className="animate-slot-unfold flex shrink-0 items-center gap-[12px]"
+                    >
                       <button
                         type="button"
                         onClick={() => toggleHour(slot.hour)}
@@ -241,7 +299,10 @@ export default function RequiredAttendeesView({
                             <button
                               type="button"
                               aria-label="시간대 삭제"
-                              className="text-[#ff6a60] opacity-0 transition-opacity group-hover:opacity-100"
+                              onClick={() => deleteHour(slot.hour)}
+                              className={`text-[#ff6a60] transition-opacity ${
+                                hoveredHour === slot.hour ? "opacity-100" : "opacity-0"
+                              }`}
                             >
                               <TrashIcon size={24} />
                             </button>
@@ -256,16 +317,41 @@ export default function RequiredAttendeesView({
                 }
                 const shown = slot.blockedBy.slice(0, MAX_BLOCKED_CHIPS);
                 const extra = slot.blockedBy.length - shown.length;
+                const isOn = checkedHours.has(slot.hour);
                 return (
-                  <div key={slot.hour} className="flex shrink-0 items-start gap-[12px]">
-                    <span className="flex size-[33px] shrink-0 items-center justify-center rounded-[8px] bg-gray-200 text-gray-600">
+                  <div
+                    key={slot.hour}
+                    data-hour={slot.hour}
+                    style={{ animationDelay: `${index * 45}ms` }}
+                    className="animate-slot-unfold flex shrink-0 items-start gap-[12px]"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleHour(slot.hour)}
+                      aria-pressed={isOn}
+                      className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] transition-colors ${
+                        isOn ? "bg-[#6373ff] text-white" : "bg-gray-200 text-transparent"
+                      }`}
+                    >
                       <CheckIcon size={18} />
-                    </span>
+                    </button>
                     <div className="flex flex-1 flex-col gap-[10px] rounded-[22px] border border-gray-400 px-[24px] py-[18px]">
                       <div className="flex flex-col gap-[3px]">
-                        <span className="text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
-                          불가능 {slot.blockedBy.length}명
-                        </span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
+                            불가능 {slot.blockedBy.length}명
+                          </span>
+                          <button
+                            type="button"
+                            aria-label="시간대 삭제"
+                            onClick={() => deleteHour(slot.hour)}
+                            className={`text-[#ff6a60] transition-opacity ${
+                              hoveredHour === slot.hour ? "opacity-100" : "opacity-0"
+                            }`}
+                          >
+                            <TrashIcon size={24} />
+                          </button>
+                        </div>
                         <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
                           {slot.time}
                         </span>
