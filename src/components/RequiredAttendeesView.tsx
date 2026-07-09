@@ -150,7 +150,7 @@ export default function RequiredAttendeesView({
                       <button
                         type="button"
                         onClick={() => addParticipant(name)}
-                        className="flex h-[28px] w-[52px] items-center justify-center rounded-[12px] bg-white text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 opacity-0 transition-opacity group-hover:opacity-100"
+                        className="flex h-[28px] w-[52px] items-center justify-center rounded-[12px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 opacity-0 transition-opacity group-hover:opacity-100"
                       >
                         추가
                       </button>
@@ -168,11 +168,9 @@ export default function RequiredAttendeesView({
             {/* 목록 */}
             <div className="mt-[11px] flex flex-col gap-[17px]">
               {RECENT.map((p, i) => (
-                <button
+                <div
                   key={`${p.name}-${i}`}
-                  type="button"
-                  onClick={() => addParticipant(p.name)}
-                  className="flex items-center justify-between rounded-[12px] px-[18px] py-[2px] transition-colors hover:bg-gray-100"
+                  className="group flex items-center justify-between rounded-[12px] px-[18px] py-[2px] transition-colors hover:bg-gray-100"
                 >
                   <div className="flex items-center gap-[11px]">
                     <span className="size-[36px] shrink-0 rounded-full bg-gray-600" />
@@ -180,12 +178,14 @@ export default function RequiredAttendeesView({
                       {p.name}
                     </span>
                   </div>
-                  {p.host && (
-                    <span className="flex h-[28px] w-[52px] items-center justify-center rounded-[12px] bg-white text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600">
-                      주최
-                    </span>
-                  )}
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => addParticipant(p.name)}
+                    className="flex h-[28px] w-[52px] items-center justify-center rounded-[12px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    추가
+                  </button>
+                </div>
               ))}
             </div>
           </div>
