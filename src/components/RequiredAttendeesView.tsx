@@ -5,6 +5,7 @@ import { WEEKDAYS } from "@/lib/calendar";
 import { PEOPLE, SELF } from "@/data/people";
 import { buildDaySlots } from "@/data/schedules";
 import { CheckIcon, CloseIcon, SearchIcon, SendIcon, TrashIcon } from "./icons";
+import { useInvite } from "./InviteContext";
 
 interface RequiredAttendeesViewProps {
   open: boolean;
@@ -63,6 +64,8 @@ export default function RequiredAttendeesView({
   const [deletedHours, setDeletedHours] = useState<Set<number>>(() => new Set());
   // "선택 날짜 초대 보내기"를 누르면 전송 완료 화면으로 전환
   const [sent, setSent] = useState(false);
+  // 초대 전송 → 사이드바 알림에 반영
+  const { sendInvite } = useInvite();
 
   // 선택 참석자 + 날짜 → 시간대별 가능/불가능 계산
   const slots = useMemo(
@@ -456,7 +459,16 @@ export default function RequiredAttendeesView({
           </button>
           <button
             type="button"
-            onClick={() => setSent(true)}
+            onClick={() => {
+              const recommended = visibleSlots.find((s) => s.blockedBy.length === 0);
+              sendInvite({
+                topic: title,
+                participants,
+                dateLabel: formatHeaderDate(startDate),
+                recommendedTime: recommended?.time ?? "",
+              });
+              setSent(true);
+            }}
             className="flex h-[57px] w-[232px] items-center justify-center gap-[8px] rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition-colors hover:brightness-95"
           >
             선택 날짜 초대 보내기

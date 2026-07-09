@@ -6,6 +6,7 @@ import { DayViewProvider } from "@/components/DayViewContext";
 import { MonthViewProvider } from "@/components/MonthViewContext";
 import { WeekViewProvider } from "@/components/WeekViewContext";
 import { ViewModeProvider } from "@/components/ViewModeContext";
+import { InviteProvider } from "@/components/InviteContext";
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
       <MonthViewProvider>
         <WeekViewProvider>
           <DayViewProvider>
+            <InviteProvider>
             <div className="flex h-screen w-full overflow-hidden">
               <Sidebar />
 
@@ -31,6 +33,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            </InviteProvider>
           </DayViewProvider>
         </WeekViewProvider>
       </MonthViewProvider>
