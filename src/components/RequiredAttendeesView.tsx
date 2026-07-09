@@ -284,8 +284,8 @@ export default function RequiredAttendeesView({
                         type="button"
                         onClick={() => toggleHour(slot.hour)}
                         aria-pressed={isOn}
-                        className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] transition-colors ${
-                          isOn ? "bg-[#6373ff] text-white" : "bg-gray-200 text-transparent"
+                        className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] text-white transition-colors ${
+                          isOn ? "bg-[#6373ff]" : "bg-[#d6e4ff]"
                         }`}
                       >
                         <CheckIcon size={18} />
