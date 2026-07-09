@@ -215,7 +215,7 @@ export default function RequiredAttendeesView({
               {RECENT.map((p, i) => (
                 <div
                   key={`${p.name}-${i}`}
-                  className="group flex items-center justify-between rounded-[12px] px-[18px] py-[2px] transition-colors hover:bg-gray-100"
+                  className="group flex items-center justify-between rounded-[12px] px-[18px] py-[6px] transition-colors hover:bg-[#f7f8f9]"
                 >
                   <div className="flex items-center gap-[11px]">
                     <span className="size-[36px] shrink-0 rounded-full bg-gray-600" />
@@ -268,14 +268,15 @@ export default function RequiredAttendeesView({
                 </p>
               </div>
             ) : (
-            /* 시간대 목록 — 선택 참석자들의 실제 일정으로 계산 */
+            /* 시간대 목록 — 선택 참석자들의 실제 일정으로 계산.
+               각 행 key에 불가능 인원 수를 섞어, 상태가 바뀐 행만 재마운트되며 펼침 애니메이션이 다시 재생된다. */
             <div className="mt-[20px] flex flex-1 flex-col gap-[9px] overflow-y-auto pb-[44px] pr-[4px]">
               {visibleSlots.map((slot, index) => {
                 if (slot.blockedBy.length === 0) {
                   const isOn = checkedHours.has(slot.hour);
                   return (
                     <div
-                      key={slot.hour}
+                      key={`${slot.hour}:${slot.blockedBy.length}`}
                       data-hour={slot.hour}
                       style={{ animationDelay: `${index * 45}ms` }}
                       className="animate-slot-unfold flex shrink-0 items-center gap-[12px]"
@@ -320,7 +321,7 @@ export default function RequiredAttendeesView({
                 const isOn = checkedHours.has(slot.hour);
                 return (
                   <div
-                    key={slot.hour}
+                    key={`${slot.hour}:${slot.blockedBy.length}`}
                     data-hour={slot.hour}
                     style={{ animationDelay: `${index * 45}ms` }}
                     className="animate-slot-unfold flex shrink-0 items-start gap-[12px]"
