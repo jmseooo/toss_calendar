@@ -188,7 +188,7 @@ export default function RequiredAttendeesView({
             {participants.map((n) => (
               <div
                 key={n}
-                className="flex items-center gap-[11px] rounded-[18px] border border-gray-400 bg-white/[0.66] p-[12px]"
+                className="flex items-center gap-[11px] rounded-[18px] bg-white/[0.66] p-[12px]"
               >
                 <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
                 <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
