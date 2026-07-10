@@ -2,39 +2,38 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { buildDaySlots } from "@/data/schedules";
-import { CheckIcon } from "./icons";
+import { CheckIcon, StarIcon } from "./icons";
 import type { InviteInfo } from "./InviteContext";
 
-interface MeetingConfirmViewProps {
+interface MeetingReplyViewProps {
   open: boolean;
   invite: InviteInfo;
   /** "뒤로" / Esc — 닫기 */
   onClose: () => void;
-  /** "일정 확정하기" — 고른 시간대로 확정 */
-  onConfirm: (hour: number) => void;
+  /** "이 일정으로 전달하기" — 고른 시간대들로 답변 */
+  onSubmit: (hours: number[]) => void;
 }
 
-/** 겹쳐 그릴 아바타 최대 개수 */
-const MAX_AVATARS = 4;
+/** 처음에 보여줄 후보 개수. 나머지는 "다른 후보 일정 더보기"로 편다. */
+const INITIAL_SLOTS = 2;
 
 /**
- * "회의 일정 확정하기" 화면 (Figma 215:10619).
- * 사이드바 알림(참석자가 일정을 선택했습니다)을 누르면 열린다.
+ * "괜찮은 일정을 선택해주세요" — 참여자 답변 화면 (Figma 243:5991).
+ * 참여자 화면에서 사이드바 알림을 누르면 열린다.
  *
- * 시간대 행·체크박스·참석자 칩은 RequiredAttendeesView 에 이미 구현된 것과
- * 같은 규칙을 쓴다. 다른 점은 카드가 하나뿐이고, 여러 개를 고르는 게 아니라
- * 확정할 시간대 하나만 고른다는 것.
+ * 주최자의 확정 화면(MeetingConfirmView)과 시간대 행·체크박스·참석자 칩이
+ * 같은 규칙이다. 다른 점은 여러 개를 고를 수 있고, 행마다 "좋아요"(별)로
+ * 선호를 표시할 수 있다는 것.
  */
-export default function MeetingConfirmView({
+export default function MeetingReplyView({
   open,
   invite,
   onClose,
-  onConfirm,
-}: MeetingConfirmViewProps) {
-  const { topic, participants, startDate, dateLabel } = invite;
+  onSubmit,
+}: MeetingReplyViewProps) {
+  const { topic, participants, startDate } = invite;
 
-  // 참석자 전원이 안 되는 시간대는 고를 이유가 없어 숨긴다 (일정 찾기 화면과 같은 규칙).
-  // 모두 가능한 시간대를 위로, 일부 불가능한 시간대를 아래로.
+  // 참석자 전원이 안 되는 시간대는 숨긴다. 모두 가능한 시간대를 위로.
   const slots = useMemo(() => {
     const shown = buildDaySlots(participants, startDate).filter(
       (slot) => slot.blockedBy.length < participants.length,
@@ -44,9 +43,12 @@ export default function MeetingConfirmView({
     return [...available, ...blocked];
   }, [participants, startDate]);
 
-  // 1순위 = 모두 가능한 첫 시간대. 없으면 가장 적게 막힌 첫 시간대.
-  const recommendedHour = slots[0]?.hour ?? null;
-  const [selected, setSelected] = useState<number | null>(recommendedHour);
+  // 1순위(모두 가능한 첫 시간대)를 미리 골라둔다.
+  const [checked, setChecked] = useState<Set<number>>(
+    () => new Set(slots.length > 0 ? [slots[0].hour] : []),
+  );
+  const [liked, setLiked] = useState<Set<number>>(() => new Set());
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -59,23 +61,33 @@ export default function MeetingConfirmView({
 
   if (!open) return null;
 
+  const visible = expanded ? slots : slots.slice(0, INITIAL_SLOTS);
+  const allChecked =
+    visible.length > 0 && visible.every((s) => checked.has(s.hour));
+
+  function toggle(set: Set<number>, hour: number) {
+    const next = new Set(set);
+    if (next.has(hour)) next.delete(hour);
+    else next.add(hour);
+    return next;
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-[#f7f8f9] px-2 py-[24px]">
       {/* 화면 정중앙에 놓는다. max-h-full 이라 세로가 짧아도 스크롤이 생기지 않고,
           대신 shrink 가 걸린 카드만 줄어든다 (헤더와 CTA는 shrink-0). */}
-      <div className="flex max-h-full w-[533px] max-w-full flex-col">
+      <div className="flex max-h-full w-[589px] max-w-full flex-col">
         {/* ── 헤더 ── */}
         <div className="shrink-0 pl-[3px]">
-          <div className="flex items-center gap-[8px] text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
-            <span className="whitespace-nowrap">{topic}</span>
-            <span className="size-[6px] rounded-full bg-[#cfd4dd]" />
-            <span className="whitespace-nowrap">{dateLabel}</span>
-          </div>
+          <p className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
+            <span className="text-carrot-600">{topic}</span> 회의 일정에
+            초대받았어요.
+          </p>
           <h1 className="mt-[10px] text-[28px] font-bold leading-[1.6] tracking-[-0.5px] text-black">
-            회의 일정 확정하기
+            괜찮은 일정을 선택해주세요.
           </h1>
           <p className="mt-[2px] text-[14px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800">
-            필수 참석자들이 선택한 일정 결과예요. 1순위 일정을 추천드려요
+            가능 시간, 선호시간을 선택해 답변을 보내주세요.
           </p>
         </div>
 
@@ -96,22 +108,62 @@ export default function MeetingConfirmView({
             ))}
           </div>
 
-          {/* 시간대 목록 — 하나만 고른다 */}
-          <div className="mt-[20px] flex flex-1 flex-col gap-[9px] overflow-y-auto pb-[44px] pr-[4px]">
-            {slots.map((slot, index) => {
-              const isOn = selected === slot.hour;
+          {/* 전체 선택 */}
+          <div className="mt-[24px] flex items-center justify-end">
+            <button
+              type="button"
+              onClick={() =>
+                setChecked(
+                  allChecked
+                    ? new Set()
+                    : new Set(visible.map((s) => s.hour)),
+                )
+              }
+              className="flex h-[36px] w-[116px] shrink-0 items-center justify-center rounded-[18px] bg-[#f7f8f9] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-1000 transition-colors hover:bg-gray-300/70"
+            >
+              {allChecked ? "선택 해제" : "전체 선택"}
+            </button>
+          </div>
+
+          {/* 시간대 목록 */}
+          <div className="mt-[16px] flex flex-1 flex-col gap-[9px] overflow-y-auto pb-[44px] pr-[4px]">
+            {visible.map((slot, index) => {
+              const isOn = checked.has(slot.hour);
+              const isLiked = liked.has(slot.hour);
               const allFree = slot.blockedBy.length === 0;
-              const attending = participants.length - slot.blockedBy.length;
 
               return (
                 <div
                   key={slot.hour}
                   style={{ animationDelay: `${index * 45}ms` }}
-                  className="animate-slot-unfold flex shrink-0 items-center gap-[12px]"
+                  className="animate-slot-unfold relative flex shrink-0 items-center gap-[12px]"
                 >
+                  {/* 첫 행 위에만 말풍선 안내. 꼬리가 체크박스를 가리키도록
+                      오른쪽 끝을 체크박스에 맞추고 왼쪽으로 뻗는다. */}
+                  {index === 0 && (
+                    <div className="pointer-events-none absolute bottom-full left-[74px] z-10 flex -translate-x-full flex-col items-end pb-[4px]">
+                      <div className="whitespace-nowrap rounded-[12px] bg-gray-1000 p-[10px] text-[14px] font-semibold leading-[1.6] tracking-[-0.5px] text-[#f7f8f9]">
+                        이중에 정말 좋은 시간이 있다면, ‘좋아요’를 눌러주세요!
+                      </div>
+                      <div className="mr-[12px] size-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-gray-1000" />
+                    </div>
+                  )}
+
                   <button
                     type="button"
-                    onClick={() => setSelected(slot.hour)}
+                    onClick={() => setLiked((prev) => toggle(prev, slot.hour))}
+                    aria-pressed={isLiked}
+                    aria-label={`${slot.time} 좋아요`}
+                    className={`flex size-[40px] shrink-0 items-center justify-center transition-colors ${
+                      isLiked ? "text-carrot-600" : "text-gray-600 hover:text-gray-700"
+                    }`}
+                  >
+                    <StarIcon size={32} filled />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setChecked((prev) => toggle(prev, slot.hour))}
                     aria-pressed={isOn}
                     aria-label={`${slot.time} 선택`}
                     className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] transition-colors ${
@@ -123,8 +175,8 @@ export default function MeetingConfirmView({
 
                   <button
                     type="button"
-                    onClick={() => setSelected(slot.hour)}
-                    className={`flex flex-1 items-center gap-[8px] rounded-[22px] px-[24px] py-[18px] text-left transition-colors ${
+                    onClick={() => setChecked((prev) => toggle(prev, slot.hour))}
+                    className={`flex flex-1 items-center rounded-[22px] px-[24px] py-[18px] text-left transition-colors ${
                       allFree
                         ? "bg-[#f5f6ff]"
                         : "border border-gray-400 hover:bg-gray-300/40"
@@ -137,7 +189,6 @@ export default function MeetingConfirmView({
                             <span className="rounded-[6px] bg-[#d8dcff] p-[6px] text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] text-[#6373ff]">
                               모두 가능
                             </span>
-                            {/* 1순위는 첫 행 하나뿐 */}
                             {index === 0 && (
                               <span className="rounded-[6px] bg-white p-[6px] text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] text-[#6373ff]">
                                 선호도 최상
@@ -158,23 +209,23 @@ export default function MeetingConfirmView({
                         {slot.time}
                       </span>
                     </div>
-
-                    {/* 그 시간에 올 수 있는 사람 수만큼 아바타를 겹쳐 그린다 */}
-                    <div className="flex shrink-0">
-                      {Array.from({
-                        length: Math.min(attending, MAX_AVATARS),
-                      }).map((_, i) => (
-                        <span
-                          key={i}
-                          style={{ marginLeft: i === 0 ? 0 : -15 }}
-                          className="size-[30px] shrink-0 rounded-full bg-gray-600"
-                        />
-                      ))}
-                    </div>
                   </button>
                 </div>
               );
             })}
+
+            {!expanded && slots.length > INITIAL_SLOTS && (
+              /* pl 97px = 별 40 + 12 + 체크박스 33 + 12. 일정 카드 기준으로 가운데 온다. */
+              <div className="mt-[8px] flex shrink-0 justify-center pl-[97px]">
+                <button
+                  type="button"
+                  onClick={() => setExpanded(true)}
+                  className="text-[14px] font-semibold leading-[1.3] tracking-[-0.5px] text-black hover:underline"
+                >
+                  다른 후보 일정 더보기
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -189,11 +240,11 @@ export default function MeetingConfirmView({
           </button>
           <button
             type="button"
-            disabled={selected === null}
-            onClick={() => selected !== null && onConfirm(selected)}
+            disabled={checked.size === 0}
+            onClick={() => onSubmit([...checked].sort((a, b) => a - b))}
             className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:brightness-100"
           >
-            일정 확정하기
+            이 일정으로 전달하기
           </button>
         </div>
       </div>

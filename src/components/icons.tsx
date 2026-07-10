@@ -188,6 +188,30 @@ export function CheckIcon({ className, size = 18 }: IconProps) {
   );
 }
 
+/** 별 — 선호("좋아요") 표시. filled 면 채우고 아니면 선만 그린다. */
+export function StarIcon({
+  className,
+  size = 24,
+  filled = false,
+}: IconProps & { filled?: boolean }) {
+  return (
+    <svg
+      {...base(size)}
+      className={className}
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      aria-hidden
+    >
+      <path
+        d="m12 3.5 2.7 5.48 6.05.88-4.38 4.27 1.04 6.02L12 17.3l-5.41 2.85 1.04-6.02L3.25 9.86l6.05-.88L12 3.5Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 /** 휴지통 (채움) — Figma icon_trash_fill */
 export function TrashIcon({ className, size = 24 }: IconProps) {
   return (
