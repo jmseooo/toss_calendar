@@ -167,7 +167,9 @@ function AgendaCard({ event, delay }: { event: CalendarEvent; delay: number }) {
     >
       {/* 좌측 색상 바 — 시간 일정만. 종일은 블록 전체가 색이라 바가 없다. */}
       {!isAllDay && (
-        <span className={`w-[4px] shrink-0 rounded-[6px] ${BAR[event.color]}`} />
+        <span
+          className={`h-[18px] w-[4px] shrink-0 self-start rounded-[6px] ${BAR[event.color]}`}
+        />
       )}
 
       <div className="flex min-w-0 flex-1 flex-col gap-[10px]">
