@@ -37,6 +37,9 @@ const INITIAL_RECENT: string[] = [SELF, "김민준", "이서연", "박지훈", "
 /* 불가능 카드에서 이름 칩을 최대 몇 개까지 노출할지 (나머지는 "+N") */
 const MAX_BLOCKED_CHIPS = 6;
 
+/* "최근검색"에 남겨둘 최대 인원. 넘치면 오래된 사람부터 밀려난다. */
+const MAX_RECENT = 6;
+
 /**
  * "필수 참석자 일정 찾기" 화면.
  * 회의 생성 모달에서 날짜 선택 후 "다음"을 누르면 이 전체 화면으로 진입한다.
@@ -123,8 +126,10 @@ export default function RequiredAttendeesView({
 
   function addParticipant(name: string) {
     setParticipants((prev) => (prev.includes(name) ? prev : [...prev, name]));
-    // 방금 추가한 사람을 "최근" 맨 앞으로 (중복 제거)
-    setRecent((prev) => [name, ...prev.filter((n) => n !== name)]);
+    // 방금 추가한 사람을 "최근검색" 맨 앞으로 (중복 제거). 6명을 넘으면 뒤에서 잘린다.
+    setRecent((prev) =>
+      [name, ...prev.filter((n) => n !== name)].slice(0, MAX_RECENT),
+    );
   }
 
   function removeParticipant(name: string) {
@@ -223,7 +228,9 @@ export default function RequiredAttendeesView({
       }}
       onMouseLeave={() => setHoveredHour(null)}
     >
-      <div className="mx-auto flex min-h-full w-[919px] flex-col px-2 py-[80px]">
+      {/* h-full + min-h-[720px]: 뒤로/초대 보내기 CTA까지 한 화면에 들어오도록 카드가
+          남는 높이를 나눠 갖는다. 720px보다 짧은 화면에서만 바깥이 세로로 스크롤된다. */}
+      <div className="mx-auto flex h-full min-h-[720px] w-[919px] flex-col px-2 py-[40px]">
         {/* ── 헤더 ── pl-[3px]: 아래 카드의 모서리 곡률 때문에 왼쪽 끝을 그대로 맞추면
              글자가 살짝 왼쪽으로 튀어 보인다. 3px 들여 시각적으로 맞춘다. */}
         <div className="pl-[3px]">
@@ -240,10 +247,10 @@ export default function RequiredAttendeesView({
           </p>
         </div>
 
-        {/* ── 카드 2열 ── */}
-        <div className="mt-[36px] flex gap-[28px]">
+        {/* ── 카드 2열 ── 남는 세로 공간을 채우되 시안 높이(628px)를 넘지 않는다 */}
+        <div className="mt-[28px] flex min-h-0 flex-1 gap-[28px]">
           {/* 좌측: 필수 참석자 검색 + 최근 목록 */}
-          <div className="relative h-[628px] w-[399px] shrink-0 rounded-[36px] bg-white/90 px-[30px] pt-[41px] shadow-card">
+          <div className="relative h-full max-h-[628px] w-[399px] shrink-0 rounded-[36px] bg-white/90 px-[30px] pt-[41px] shadow-card">
             {/* 검색 바 */}
             <div className="flex h-[42px] items-center gap-[8px] rounded-[24px] bg-[#f7f8f9] pl-[18px] pr-[15px]">
               <input
@@ -316,7 +323,7 @@ export default function RequiredAttendeesView({
           </div>
 
           {/* 우측: 참석자별 가능/불가능 시간대 */}
-          <div className="flex h-[628px] w-[492px] shrink-0 flex-col overflow-hidden rounded-[36px] bg-white px-[32px] pt-[44px] shadow-card">
+          <div className="flex h-full max-h-[628px] w-[492px] shrink-0 flex-col overflow-hidden rounded-[36px] bg-white px-[32px] pt-[44px] shadow-card">
             {/* 참석 라벨 + 참석자 탭 — 참석자를 아직 추가하지 않았으면 라벨도 감춘다 */}
             <div className="flex flex-wrap items-center gap-[10px] pl-[3px]">
               {participants.length > 0 && (
@@ -465,7 +472,7 @@ export default function RequiredAttendeesView({
         </div>
 
         {/* ── 하단 버튼 ── */}
-        <div className="mt-[29px] flex items-center justify-end gap-[18px]">
+        <div className="mt-[29px] flex shrink-0 items-center justify-end gap-[18px]">
           <button
             type="button"
             onClick={onBack}
