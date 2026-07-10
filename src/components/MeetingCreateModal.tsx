@@ -78,14 +78,10 @@ export default function MeetingCreateModal({
   const [endDate, setEndDate] = useState<string | null>(null);
   const [picker, setPicker] = useState<PickerTarget>(null);
 
-  // 열릴 때마다 초기화 + Esc 로 닫기
+  // Esc 로 닫기. 초기화는 하지 않는다 — 부모가 key 로 다시 마운트해 주므로
+  // 열 때마다 위 useState 초기값에서 새로 시작한다.
   useEffect(() => {
     if (!open) return;
-    setStep(1);
-    setTopic("");
-    setStartDate(null);
-    setEndDate(null);
-    setPicker(null);
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
@@ -110,6 +106,23 @@ export default function MeetingCreateModal({
 
   const startLabel = startDate ? formatChip(startDate) : formatChip(TODAY);
   const endLabel = endDate ? formatChip(endDate) : formatChip(TODAY);
+
+  // 1단계는 주제를 입력해야 넘어간다. 2단계는 날짜를 비워도 오늘로 자동 설정된다.
+  const trimmedTopic = topic.trim();
+  const canProceed = step === 1 ? trimmedTopic.length > 0 : true;
+
+  function goNext() {
+    if (!canProceed) return;
+    if (step === 1) {
+      setStep(2);
+    } else {
+      onNext?.({
+        topic: trimmedTopic,
+        startDate: startDate ?? TODAY,
+        endDate: endDate ?? startDate ?? TODAY,
+      });
+    }
+  }
 
   return (
     <div
@@ -205,18 +218,9 @@ export default function MeetingCreateModal({
             </button>
             <button
               type="button"
-              onClick={() => {
-                if (step === 1) {
-                  setStep(2);
-                } else {
-                  onNext?.({
-                    topic,
-                    startDate: startDate ?? TODAY,
-                    endDate: endDate ?? startDate ?? TODAY,
-                  });
-                }
-              }}
-              className="flex h-[48px] w-[136px] items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-00 transition-colors hover:brightness-95"
+              onClick={goNext}
+              disabled={!canProceed}
+              className="flex h-[48px] w-[136px] items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-00 transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:brightness-100"
             >
               다음
             </button>

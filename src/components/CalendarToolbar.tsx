@@ -141,7 +141,7 @@ export default function CalendarToolbar() {
         {menuOpen && (
           <div
             role="menu"
-            className="absolute right-0 top-[calc(100%+10px)] z-20 w-[183px] rounded-[20px] bg-[rgba(255,255,255,0.92)] px-[10px] py-[14px] shadow-[0px_2px_40px_0px_rgba(0,0,0,0.18)] backdrop-blur-[2px]"
+            className="absolute left-1/2 top-[calc(100%+10px)] z-20 w-[183px] -translate-x-1/2 rounded-[20px] bg-[rgba(255,255,255,0.92)] px-[10px] py-[14px] shadow-[0px_2px_40px_0px_rgba(0,0,0,0.18)] backdrop-blur-[2px]"
           >
             {/* 일정 추가 — 비활성 */}
             <button
@@ -169,8 +169,9 @@ export default function CalendarToolbar() {
         )}
       </div>
 
-      {/* 회의 생성 모달 */}
+      {/* 회의 생성 모달 — 열 때마다 초기 상태로 새로 마운트 */}
       <MeetingCreateModal
+        key={meetingOpen ? "meeting-open" : "meeting-closed"}
         open={meetingOpen}
         onClose={() => setMeetingOpen(false)}
         onNext={(data) => {
