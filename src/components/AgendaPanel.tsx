@@ -42,8 +42,9 @@ const FILLED: Record<EventColor, string> = {
  * 그 아래로 기본 날짜(오늘·내일)가 이어집니다.
  *
  * 정렬 규칙(피그마 기준):
- * - 첫 날짜 헤딩은 좌측 툴바와 같은 높이 대역(57px)에 놓여,
- * - 첫 일정 카드의 윗변이 월간 캘린더 카드의 윗변과 같은 라인에서 시작한다.
+ * - 날짜 헤딩은 흰 카드 안쪽 맨 위에 들어간다.
+ * - 첫 카드의 윗변이 월간 캘린더 카드의 윗변과 같은 라인에서 시작한다.
+ *   (좌측 툴바 높이 57px + 툴바~캘린더 간격 19px = 76px)
  */
 export default function AgendaPanel() {
   const { selectedDate } = useDayView();
@@ -55,41 +56,25 @@ export default function AgendaPanel() {
     addDays(baseDate, i),
   );
 
-  const [firstDate, ...restDates] = dates;
-
   return (
-    <div className="flex w-[200px] flex-col gap-[19px] sm:w-[260px] md:w-[300px] xl:w-[321px]">
+    <div className="flex w-[200px] flex-col pt-[76px] sm:w-[260px] md:w-[300px] xl:w-[321px]">
       {/* key={baseDate} — 날짜를 새로 고를 때마다 아래 전체가 다시 마운트되어
-          촤라락 애니메이션이 매번 처음부터 재생된다.
-          display:contents 라서 바깥 flex 레이아웃에는 영향을 주지 않는다. */}
-      <div key={baseDate} className="contents">
-        {/* 첫 날짜 헤딩 — 툴바와 같은 57px 높이로 맞춰 아래 카드가 월간 그리드와 정렬 */}
-        <div className="flex h-[57px] items-center">
-          <DayHeading
-            date={firstDate}
-            active={firstDate === selectedDate}
-            delay={0}
+          촤라락 애니메이션이 매번 처음부터 재생된다. */}
+      <div key={baseDate} className="flex flex-col gap-[30px]">
+        {dates.map((date, i) => (
+          <DayCard
+            key={date}
+            date={date}
+            active={date === selectedDate}
+            delay={i * DAY_STEP}
           />
-        </div>
-
-        {/* 카드 스택 — 첫 카드는 헤딩 없이 바로, 이후 날짜는 헤딩 + 카드 */}
-        <div className="flex flex-col gap-[30px]">
-          <DayCardBody date={firstDate} delay={0} />
-          {restDates.map((date, i) => (
-            <DaySection
-              key={date}
-              date={date}
-              active={date === selectedDate}
-              delay={(i + 1) * DAY_STEP}
-            />
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   );
 }
 
-/** 날짜 헤딩 (선택된 날짜면 오렌지) */
+/** 날짜 헤딩 (선택된 날짜면 오렌지). pl은 아래 일정 카드의 색상 바와 좌측을 맞춘다. */
 function DayHeading({
   date,
   active,
@@ -102,8 +87,8 @@ function DayHeading({
   return (
     <h2
       style={{ animationDelay: `${delay}ms` }}
-      className={`animate-agenda-cascade px-[24px] text-[22px] font-semibold leading-[1.6] ${
-        active ? "text-carrot-600" : "text-gray-1000"
+      className={`animate-agenda-cascade pl-[6px] text-[18px] font-semibold leading-[1.6] ${
+        active ? "text-carrot-600" : "text-gray-700"
       }`}
     >
       {formatAgendaHeading(date)}
@@ -111,8 +96,16 @@ function DayHeading({
   );
 }
 
-/** 하루치 일정 카드(흰 카드 + 일정 목록). delay = 그 날짜 블록이 나타나기 시작하는 시각 */
-function DayCardBody({ date, delay }: { date: string; delay: number }) {
+/** 하루치 일정 카드(흰 카드 = 날짜 헤딩 + 일정 목록). delay = 그 날짜 블록이 나타나기 시작하는 시각 */
+function DayCard({
+  date,
+  active,
+  delay,
+}: {
+  date: string;
+  active: boolean;
+  delay: number;
+}) {
   // 종일(블록) 일정을 맨 위로, 나머지(시간 일정)는 원래 순서 유지.
   const dayEvents = [...eventsByDate(date)].sort(
     (a, b) => (a.chip === "filled" ? 0 : 1) - (b.chip === "filled" ? 0 : 1),
@@ -126,6 +119,8 @@ function DayCardBody({ date, delay }: { date: string; delay: number }) {
       style={{ animationDelay: `${delay}ms` }}
       className="animate-agenda-fade flex flex-col gap-[8px] rounded-[18px] bg-gray-00 px-[19px] py-[21px] shadow-card"
     >
+      <DayHeading date={date} active={active} delay={delay} />
+
       {dayEvents.length > 0 ? (
         dayEvents.map((event, i) => (
           <AgendaCard
@@ -143,24 +138,6 @@ function DayCardBody({ date, delay }: { date: string; delay: number }) {
         </p>
       )}
     </div>
-  );
-}
-
-/** 하루치 섹션 — 날짜 헤딩 + 일정 카드 (첫 날짜 이후에 사용) */
-function DaySection({
-  date,
-  active,
-  delay,
-}: {
-  date: string;
-  active: boolean;
-  delay: number;
-}) {
-  return (
-    <section className="flex flex-col gap-[10px]">
-      <DayHeading date={date} active={active} delay={delay} />
-      <DayCardBody date={date} delay={delay} />
-    </section>
   );
 }
 
