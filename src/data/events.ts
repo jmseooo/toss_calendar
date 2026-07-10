@@ -370,40 +370,67 @@ export const events: CalendarEvent[] = [
 /** 화면을 보는 사람의 역할 — 주최자와 참여자는 서로 다른 캘린더를 본다 */
 export type ViewRole = "organizer" | "invitee";
 
-/**
- * 참여자용 일정 — 이벤트 내용은 그대로 두고 놓이는 날짜만 전부 바꾼다.
- *
- * 같은 달 안에서 "일정이 있는 날"들을 한 칸씩 밀어(마지막은 처음으로) 만든다.
- * 평일끼리, 주말끼리 따로 돌리므로 데일리 스탠드업이 주말로 가지 않고
- * 주말에 어울리는 일정이 평일로 내려오지도 않는다. 달마다 평일 8~9일 ·
- * 주말 2~3일이 차 있어 회전 후 모든 날짜가 원래와 달라진다.
- */
-function rotateWithinMonth(list: CalendarEvent[]): CalendarEvent[] {
-  const isWeekend = (iso: string) => {
-    const day = new Date(iso + "T00:00:00").getDay();
-    return day === 0 || day === 6;
-  };
+const isWeekendISO = (iso: string) => {
+  const day = new Date(iso + "T00:00:00").getDay();
+  return day === 0 || day === 6;
+};
 
-  // 달 → (평일 날짜들, 주말 날짜들)
+/** 그 달의 모든 날짜 ISO */
+function daysOfMonth(month: string): string[] {
+  const [y, m] = month.split("-").map(Number);
+  const last = new Date(y, m, 0).getDate();
+  return Array.from(
+    { length: last },
+    (_, i) => `${month}-${String(i + 1).padStart(2, "0")}`,
+  );
+}
+
+/** pool 에서 n개를 고르게 뽑는다 (앞에서부터 균등 간격) */
+function pickSpread(pool: string[], n: number): string[] {
+  if (n >= pool.length) return pool.slice(0, n);
+  const step = pool.length / n;
+  return Array.from({ length: n }, (_, i) => pool[Math.floor(i * step)]);
+}
+
+/**
+ * 참여자용 일정 — 이벤트 내용은 그대로 두고 "일정이 놓이는 날짜" 자체를 바꾼다.
+ *
+ * 주최자가 쓰지 않은 날 중에서 같은 개수만큼 새로 골라, 그 달의 옛 날짜를
+ * 순서대로 새 날짜에 대응시킨다. 두 역할의 날짜 집합이 겹치지 않으므로
+ * (예: 주최자 1·2일 → 참여자 3·8일) 모든 일정이 다른 날에 놓인다.
+ *
+ * 평일은 평일 중에서, 주말은 주말 중에서 고른다. 안 그러면 데일리 스탠드업이
+ * 주말로 가거나 주말 워크숍이 평일로 내려온다. 달마다 평일 21~23일 중 8~9일만,
+ * 주말 8~10일 중 2~3일만 쓰고 있어 겹치지 않게 새로 뽑을 여유가 충분하다.
+ */
+function relocateWithinMonth(list: CalendarEvent[]): CalendarEvent[] {
   const byMonth = new Map<string, { weekday: string[]; weekend: string[] }>();
   for (const iso of [...new Set(list.map((e) => e.date))].sort()) {
     const month = iso.slice(0, 7);
     const bucket = byMonth.get(month) ?? { weekday: [], weekend: [] };
-    (isWeekend(iso) ? bucket.weekend : bucket.weekday).push(iso);
+    (isWeekendISO(iso) ? bucket.weekend : bucket.weekday).push(iso);
     byMonth.set(month, bucket);
   }
 
   const moved = new Map<string, string>();
-  for (const { weekday, weekend } of byMonth.values()) {
-    for (const dates of [weekday, weekend]) {
-      dates.forEach((iso, i) => moved.set(iso, dates[(i + 1) % dates.length]));
+  for (const [month, used] of byMonth) {
+    const taken = new Set([...used.weekday, ...used.weekend]);
+    const free = daysOfMonth(month).filter((iso) => !taken.has(iso));
+
+    for (const [old, isWeekendBucket] of [
+      [used.weekday, false],
+      [used.weekend, true],
+    ] as const) {
+      const pool = free.filter((iso) => isWeekendISO(iso) === isWeekendBucket);
+      const picked = pickSpread(pool, old.length);
+      old.forEach((iso, i) => moved.set(iso, picked[i]));
     }
   }
 
   return list.map((e) => ({ ...e, date: moved.get(e.date) ?? e.date }));
 }
 
-const inviteeEvents = rotateWithinMonth(events);
+const inviteeEvents = relocateWithinMonth(events);
 
 /** 역할별 일정 목록 */
 export function eventsFor(role: ViewRole): CalendarEvent[] {
