@@ -223,27 +223,31 @@ export default function RequiredAttendeesView({
       onMouseLeave={() => setHoveredHour(null)}
     >
       <div className="mx-auto flex min-h-full w-[919px] flex-col px-2 py-[80px]">
-        {/* ── 헤더 ── */}
-        <div className="flex items-center gap-[8px] text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
-          <span className="whitespace-nowrap">{title}</span>
-          <span className="size-[6px] rounded-full bg-[#cfd4dd]" />
-          <span className="whitespace-nowrap">{formatHeaderDate(startDate)}</span>
+        {/* ── 헤더 ── pl-[3px]: 아래 카드의 모서리 곡률 때문에 왼쪽 끝을 그대로 맞추면
+             글자가 살짝 왼쪽으로 튀어 보인다. 3px 들여 시각적으로 맞춘다. */}
+        <div className="pl-[3px]">
+          <div className="flex items-center gap-[8px] text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
+            <span className="whitespace-nowrap">{title}</span>
+            <span className="size-[6px] rounded-full bg-[#cfd4dd]" />
+            <span className="whitespace-nowrap">{formatHeaderDate(startDate)}</span>
+          </div>
+          <h1 className="mt-[10px] text-[28px] font-bold leading-[1.6] tracking-[-0.5px] text-black">
+            필수 참석자 일정 찾기
+          </h1>
+          <p className="mt-[2px] text-[14px] font-semibold leading-[1.6] tracking-[-0.5px] text-[#ff6a60]">
+            필수 참석자의 빈 시간을 찾아드려요. 일정이 확정되면 선택 참석자에게도 공유해요.
+          </p>
         </div>
-        <h1 className="mt-[10px] text-[28px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
-          필수 참석자 일정 찾기
-        </h1>
-        <p className="mt-[2px] text-[14px] font-semibold leading-[1.6] tracking-[-0.5px] text-[#ff6a60]">
-          필수 참석자의 빈 시간을 찾아드려요. 일정이 확정되면 선택 참석자에게도 공유해요.
-        </p>
 
         {/* ── 카드 2열 ── */}
         <div className="mt-[36px] flex gap-[28px]">
           {/* 좌측: 필수 참석자 검색 + 최근 목록 */}
           <div className="relative h-[628px] w-[399px] shrink-0 rounded-[36px] bg-white/90 px-[30px] pt-[41px] shadow-card">
             {/* 검색 바 */}
-            <div className="flex h-[42px] items-center gap-[8px] rounded-[24px] bg-gray-100 pl-[18px] pr-[15px]">
+            <div className="flex h-[42px] items-center gap-[8px] rounded-[24px] bg-[#f7f8f9] pl-[18px] pr-[15px]">
               <input
                 type="text"
+                autoFocus // 진입하자마자 참석자를 검색할 수 있게. 부모가 key로 새로 마운트한다.
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="필수 참석자를 검색해보세요"
@@ -263,7 +267,7 @@ export default function RequiredAttendeesView({
                     >
                       <div className="flex items-center gap-[11px]">
                         <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
-                        <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
+                        <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-900">
                           {name}
                         </span>
                       </div>
@@ -280,9 +284,9 @@ export default function RequiredAttendeesView({
               </div>
             )}
 
-            {/* 최근 라벨 */}
+            {/* 최근검색 라벨 */}
             <p className="mt-[20px] pl-[20px] text-[13px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-700">
-              최근
+              최근검색
             </p>
 
             {/* 목록 */}
@@ -290,11 +294,11 @@ export default function RequiredAttendeesView({
               {recent.map((name) => (
                 <div
                   key={name}
-                  className="group flex items-center justify-between rounded-[12px] px-[18px] py-[6px] transition-colors hover:bg-[#f7f8f9]"
+                  className="group flex items-center justify-between rounded-[12px] px-[18px] py-[3px] transition-colors hover:bg-[#f7f8f9]"
                 >
                   <div className="flex items-center gap-[11px]">
                     <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
-                    <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
+                    <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-900">
                       {name}
                     </span>
                   </div>
@@ -312,11 +316,13 @@ export default function RequiredAttendeesView({
 
           {/* 우측: 참석자별 가능/불가능 시간대 */}
           <div className="flex h-[628px] w-[492px] shrink-0 flex-col overflow-hidden rounded-[36px] bg-white px-[32px] pt-[44px] shadow-card">
-            {/* 참석 라벨 + 참석자 탭 */}
+            {/* 참석 라벨 + 참석자 탭 — 참석자를 아직 추가하지 않았으면 라벨도 감춘다 */}
             <div className="flex flex-wrap items-center gap-[10px] pl-[3px]">
-              <span className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-700">
-                참석
-              </span>
+              {participants.length > 0 && (
+                <span className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-700">
+                  참석
+                </span>
+              )}
               {participants.map((n) => (
                 <span
                   key={n}
