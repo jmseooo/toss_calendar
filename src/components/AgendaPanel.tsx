@@ -213,7 +213,7 @@ function AgendaCard({ event, delay }: { event: CalendarEvent; delay: number }) {
 
         {/* 참석자 아바타 */}
         {event.attendeeCount ? (
-          <div className="flex items-center gap-[10px]">
+          <div className="flex items-center gap-[3px]">
             <div className="flex">
               {[0, 1, 2].map((i) => (
                 <span
