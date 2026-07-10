@@ -218,8 +218,8 @@ function AgendaCard({ event, delay }: { event: CalendarEvent; delay: number }) {
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}
-                  className="size-[36px] rounded-full border-2 border-gray-00 bg-gray-600"
-                  style={{ marginLeft: i === 0 ? 0 : -18 }}
+                  className="size-[28px] rounded-full border-2 border-gray-00 bg-gray-600"
+                  style={{ marginLeft: i === 0 ? 0 : -14 }} // 지름의 절반만큼 겹친다
                 />
               ))}
             </div>
