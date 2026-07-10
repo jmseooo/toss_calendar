@@ -27,8 +27,11 @@ export default function Home() {
                   <CalendarView />
                 </main>
 
-                {/* 우측: 일별 캘린더(아젠다) — 항상 캘린더 옆에 표시 */}
-                <div className="min-h-0 shrink-0 overflow-y-auto px-3 py-6 sm:px-4 xl:py-[24px] xl:pl-0 xl:pr-[42px]">
+                {/* 우측: 일별 캘린더(아젠다) — 항상 캘린더 옆에 표시.
+                    scrollbar-gutter:stable — 고른 날짜의 일정 개수에 따라 세로 스크롤바가
+                    생겼다 사라지면 이 컬럼 폭이 스크롤바만큼 바뀌고, 그만큼 가운데 캘린더가
+                    좁아졌다 넓어진다. 스크롤바 자리를 늘 비워둬 가로폭을 일정하게 유지한다. */}
+                <div className="min-h-0 shrink-0 overflow-y-auto [scrollbar-gutter:stable] px-3 py-6 sm:px-4 xl:py-[24px] xl:pl-0 xl:pr-[42px]">
                   <AgendaPanel />
                 </div>
               </div>

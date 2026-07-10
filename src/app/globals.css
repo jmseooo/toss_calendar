@@ -74,9 +74,47 @@
   animation: slot-unfold 0.32s ease-out both;
 }
 
+/* 아젠다 촤라락 — 날짜를 새로 고르면 헤딩·일정 카드가 위에서부터
+   차례로 젖혀지며 펼쳐진다. perspective를 keyframe 안에 넣어
+   조상 요소의 display:contents 여부와 무관하게 원근이 적용되게 한다. */
+@keyframes agenda-cascade {
+  from {
+    opacity: 0;
+    transform: perspective(700px) translateY(-12px) rotateX(-38deg);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(700px) translateY(0) rotateX(0deg);
+  }
+}
+
+.animate-agenda-cascade {
+  transform-origin: top center;
+  backface-visibility: hidden;
+  animation: agenda-cascade 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 아젠다 흰 카드 컨테이너 — 안쪽 일정이 펼쳐지기 전에 빈 카드만 먼저 뜨지 않도록
+   같은 지연으로 함께 나타난다. transform 없이 opacity만 바꿔
+   안쪽 카드의 rotateX와 변형이 겹치지 않게 한다. */
+@keyframes agenda-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-agenda-fade {
+  animation: agenda-fade 0.24s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-view-enter,
-  .animate-slot-unfold {
+  .animate-slot-unfold,
+  .animate-agenda-cascade,
+  .animate-agenda-fade {
     animation: none;
   }
 }
