@@ -20,21 +20,22 @@
   --color-carrot-600: #ff6600;
   --color-carrot-200: #ffe8db;
 
-  /* 이벤트 강조색 — 텍스트 / 채움 배경 / 좌측 바 */
+  /* 이벤트 강조색 — 텍스트 / 채움 배경 / 좌측 바
+   * -fill 은 종일(filled) 일정의 배경. 원래 값을 흰색과 반씩 섞어 연하게 낮췄다. */
   --color-ev-blue: #007fe6;
-  --color-ev-blue-fill: #cceeff;
+  --color-ev-blue-fill: #e6f6ff;
   --color-ev-blue-bar: #a6d7ff;
   --color-ev-pink: #ff30a4;
-  --color-ev-pink-fill: #ffd6ed;
+  --color-ev-pink-fill: #ffeaf6;
   --color-ev-pink-bar: #ffc0e3;
   --color-ev-purple: #9b51e0;
-  --color-ev-purple-fill: #f2e6ff;
+  --color-ev-purple-fill: #f8f2ff;
   --color-ev-purple-bar: #e8c9ff;
   --color-ev-red: #fb5c5c;
-  --color-ev-red-fill: #ffe0e0;
+  --color-ev-red-fill: #fff0f0;
   --color-ev-red-bar: #ffc2c2;
   --color-ev-teal: #12b886;
-  --color-ev-teal-fill: #d3f9ec;
+  --color-ev-teal-fill: #e9fcf6;
   --color-ev-teal-bar: #a6ecd4;
 
   /* 그림자 (Figma effect: sh) */
