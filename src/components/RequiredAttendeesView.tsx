@@ -73,13 +73,14 @@ export default function RequiredAttendeesView({
     [participants, startDate],
   );
 
-  // 삭제한 시간대는 제외하고, 참석자가 1명일 땐 불가능 시간대는 숨김.
-  // 그 외에는 가능 시간대를 위로, 불가능 시간대를 아래로 정렬(각 그룹 내 시간 순 유지).
+  // 삭제한 시간대와, 참석자 전원이 안 되는 시간대는 숨긴다. 아무도 못 오는 시간은
+  // 고를 이유가 없다. (참석자가 1명이면 그 사람이 바쁜 시간이 곧 전원 불가다)
+  // 남은 것은 가능 시간대를 위로, 일부 불가능 시간대를 아래로 정렬(각 그룹 내 시간 순 유지).
   const visibleSlots = useMemo(() => {
     const shown = slots.filter(
       (slot) =>
         !deletedHours.has(slot.hour) &&
-        (participants.length === 1 ? slot.blockedBy.length === 0 : true),
+        slot.blockedBy.length < participants.length,
     );
     const available = shown.filter((slot) => slot.blockedBy.length === 0);
     const blocked = shown.filter((slot) => slot.blockedBy.length > 0);
