@@ -184,7 +184,7 @@ export default function RequiredAttendeesView({
                 key={n}
                 className="flex items-center gap-[11px] rounded-[18px] border border-gray-400 bg-white/[0.66] p-[12px]"
               >
-                <span className="size-[36px] shrink-0 rounded-full bg-gray-600" />
+                <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
                 <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
                   {n}
                 </span>
@@ -262,7 +262,7 @@ export default function RequiredAttendeesView({
                       className="group flex items-center justify-between rounded-[12px] px-[18px] py-[2px] transition-colors hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-[11px]">
-                        <span className="size-[36px] shrink-0 rounded-full bg-gray-600" />
+                        <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
                         <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
                           {name}
                         </span>
@@ -286,14 +286,14 @@ export default function RequiredAttendeesView({
             </p>
 
             {/* 목록 */}
-            <div className="mt-[11px] flex flex-col gap-[17px]">
+            <div className="mt-[11px] flex flex-col gap-[10px]">
               {recent.map((name) => (
                 <div
                   key={name}
                   className="group flex items-center justify-between rounded-[12px] px-[18px] py-[6px] transition-colors hover:bg-[#f7f8f9]"
                 >
                   <div className="flex items-center gap-[11px]">
-                    <span className="size-[36px] shrink-0 rounded-full bg-gray-600" />
+                    <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
                     <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
                       {name}
                     </span>
