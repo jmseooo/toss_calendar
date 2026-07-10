@@ -7,7 +7,7 @@ import { useInvite } from "./InviteContext";
 
 /**
  * 좌측 사이드바 — 가로폭에 따라 비례 축소.
- * 아이콘 열 너비: 60px(기본) → 72px(sm) → 85px(xl).
+ * 아이콘 열 너비: 52px(기본) → 62px(sm) → 72px(xl). aside와 아이콘 열의 너비는 같아야 한다.
  * 알림 벨을 누르면 사이드바가 넓어지며(팝업 아님) 그 안에 "읽지 않은 알림" 리스트가 펼쳐진다.
  * 알림은 초대를 보낸 뒤에만 생긴다.
  */
@@ -20,19 +20,23 @@ export default function Sidebar() {
   return (
     <aside
       className={`flex h-full shrink-0 overflow-hidden border-r border-gray-400/40 bg-gray-00/70 transition-[width] duration-300 ease-out ${
-        notifOpen ? "w-[380px]" : "w-[60px] sm:w-[72px] xl:w-[85px]"
+        notifOpen ? "w-[380px]" : "w-[52px] sm:w-[62px] xl:w-[72px]"
       }`}
     >
       {/* 아이콘 열 */}
-      <div className="flex w-[60px] shrink-0 flex-col items-center pt-[16px] sm:w-[72px] sm:pt-[20px] xl:w-[85px] xl:pt-[23px]">
+      <div className="flex w-[52px] shrink-0 flex-col items-center pt-[16px] sm:w-[62px] sm:pt-[20px] xl:w-[72px] xl:pt-[23px]">
         {/* 로고 */}
+        {/* width/height는 원본 픽셀(240x240) 그대로 둔다. 60을 주면 next/image가
+            60px로 줄여 다시 인코딩한 것을 내려보내 고해상도 화면에서 뭉개진다.
+            37KB짜리 로고라 최적화 이득이 없어 unoptimized로 원본을 그대로 쓴다. */}
         <Image
           src="/logo-v2.png"
           alt="로고"
-          width={60}
-          height={60}
+          width={240}
+          height={240}
           priority
-          className="size-[40px] sm:size-[50px] xl:size-[60px]"
+          unoptimized
+          className="size-[32px] sm:size-[40px] xl:size-[48px]"
         />
 
         {/* 네비게이션 아이콘 */}
