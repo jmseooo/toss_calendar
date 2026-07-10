@@ -17,6 +17,9 @@ interface DatePickerPopoverProps {
  * 흰 카드 · 6주 그리드 · 이번 달은 진하게, 이전/다음 달은 흐리게.
  * 헤더의 ‹ › 로 월을 이동할 수 있다. (Figma 원본엔 화살표가 없지만
  * 여러 달을 오가려면 필요해 최소한으로 추가)
+ *
+ * 지난 날짜는 고를 수 없다. 오늘 이전 날짜는 비활성화하고,
+ * 이번 달보다 앞으로는 넘어가지 못하게 ‹ 도 막는다.
  */
 export default function DatePickerPopover({
   value,
@@ -28,6 +31,12 @@ export default function DatePickerPopover({
   const [view, setView] = useState({ year: seedYear, month: seedMonth });
 
   const cells = buildMonthGrid(view.year, view.month, TODAY);
+
+  // 이번 달(오늘이 속한 달)보다 앞으로는 갈 수 없다.
+  const { year: todayYear, month: todayMonth } = yearMonthOf(TODAY);
+  const atFirstMonth =
+    view.year < todayYear ||
+    (view.year === todayYear && view.month <= todayMonth);
 
   function shiftMonth(delta: number) {
     setView((v) => {
@@ -48,8 +57,9 @@ export default function DatePickerPopover({
           <button
             type="button"
             aria-label="이전 달"
+            disabled={atFirstMonth}
             onClick={() => shiftMonth(-1)}
-            className="text-gray-700 transition-colors hover:text-carrot-600"
+            className="text-gray-700 transition-colors hover:text-carrot-600 disabled:cursor-not-allowed disabled:text-[#e0e0e0] disabled:hover:text-[#e0e0e0]"
           >
             <ChevronLeftIcon size={16} />
           </button>
@@ -82,24 +92,26 @@ export default function DatePickerPopover({
         <div className="grid grid-cols-7">
           {cells.map((cell) => {
             const selected = value === cell.date;
+            const past = cell.date < TODAY; // ISO 문자열이라 사전순 비교 = 날짜순 비교
+            const disabled = !cell.inMonth || past;
             return (
               <button
                 key={cell.date}
                 type="button"
-                disabled={!cell.inMonth}
+                disabled={disabled}
                 onClick={() => onSelect(cell.date)}
-                className="flex aspect-square items-center justify-center"
+                className="flex aspect-square items-center justify-center disabled:cursor-not-allowed"
               >
                 <span
                   className={[
                     "flex size-[30px] items-center justify-center rounded-full text-[16px] font-normal transition-colors",
                     selected
                       ? "bg-carrot-600 text-white"
-                      : cell.inMonth
-                        ? cell.isToday
+                      : disabled
+                        ? "text-[#e0e0e0]"
+                        : cell.isToday
                           ? "text-carrot-600"
-                          : "text-[#333] hover:bg-gray-300"
-                        : "text-[#e0e0e0]",
+                          : "text-[#333] hover:bg-gray-300",
                   ].join(" ")}
                 >
                   {cell.day}
