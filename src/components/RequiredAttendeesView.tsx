@@ -495,7 +495,7 @@ export default function RequiredAttendeesView({
             className="flex h-[57px] w-[232px] items-center justify-center gap-[8px] rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition-colors hover:brightness-95"
           >
             선택 날짜 초대 보내기
-            <SendIcon size={30} />
+            <SendIcon size={20} />
           </button>
         </div>
       </div>
