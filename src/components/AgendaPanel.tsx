@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { LocationIcon } from "./icons";
+import { ExchangeIcon, LocationIcon } from "./icons";
 import { useDayView } from "./DayViewContext";
+import { useInvite } from "./InviteContext";
 import {
   eventsByDate,
   type CalendarEvent,
@@ -48,6 +49,7 @@ const FILLED: Record<EventColor, string> = {
  */
 export default function AgendaPanel() {
   const { selectedDate } = useDayView();
+  const { role, toggleRole } = useInvite();
 
   // 기준 날짜: 월간 그리드에서 고른 날짜, 없으면 오늘.
   // 이 날짜를 맨 위에 두고 그 아래로 "다음 날짜"들을 하루씩 이어 붙인다.
@@ -57,10 +59,24 @@ export default function AgendaPanel() {
   );
 
   return (
-    <div className="flex w-[200px] flex-col pt-[76px] sm:w-[260px] md:w-[300px] xl:w-[321px]">
+    <div className="flex w-[200px] flex-col sm:w-[260px] md:w-[300px] xl:w-[321px]">
+      {/* 상단 버튼 줄 — 높이 57px은 툴바(min-h-[57px])와 같다. 덕분에 "초대자 화면"
+          버튼이 툴바의 "일정 생성하기" 버튼과 세로 중심으로 나란히 놓인다.
+          아래 mt-[19px]는 main 의 gap-[19px]와 같은 값. (원래 pt-[76px] = 57 + 19) */}
+      <div className="flex min-h-[57px] items-center">
+        <button
+          type="button"
+          onClick={toggleRole}
+          className="flex h-[42px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-full bg-gray-00 px-[14px] text-[15px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-700 transition-colors hover:bg-gray-300/50"
+        >
+          <ExchangeIcon size={20} />
+          {role === "organizer" ? "초대자 화면" : "주최자 화면"}
+        </button>
+      </div>
+
       {/* key={baseDate} — 날짜를 새로 고를 때마다 아래 전체가 다시 마운트되어
           촤라락 애니메이션이 매번 처음부터 재생된다. */}
-      <div key={baseDate} className="flex flex-col gap-[30px]">
+      <div key={baseDate} className="mt-[19px] flex flex-col gap-[30px]">
         {dates.map((date, i) => (
           <DayCard
             key={date}
@@ -107,7 +123,8 @@ function DayCard({
   delay: number;
 }) {
   // 종일(블록) 일정을 맨 위로, 나머지(시간 일정)는 원래 순서 유지.
-  const dayEvents = [...eventsByDate(date)].sort(
+  const { role } = useInvite();
+  const dayEvents = [...eventsByDate(date, role)].sort(
     (a, b) => (a.chip === "filled" ? 0 : 1) - (b.chip === "filled" ? 0 : 1),
   );
 

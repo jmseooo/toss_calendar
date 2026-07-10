@@ -12,6 +12,7 @@ import { eventsByDate } from "@/data/events";
 import EventChip from "./EventChip";
 import { useDayView } from "./DayViewContext";
 import { useMonthView } from "./MonthViewContext";
+import { useInvite } from "./InviteContext";
 
 const MAX_VISIBLE = 2; // 칸에 최대로 보여줄 칩 개수
 
@@ -52,9 +53,10 @@ export default function MonthGrid() {
 
 function DayCellView({ cell }: { cell: DayCell }) {
   const { selectedDate, openDay } = useDayView();
+  const { role } = useInvite();
   const isSelected = selectedDate === cell.date;
   const [hovered, setHovered] = useState(false);
-  const dayEvents = eventsByDate(cell.date);
+  const dayEvents = eventsByDate(cell.date, role);
   const visible = dayEvents.slice(0, MAX_VISIBLE);
   const overflow = dayEvents.length - visible.length;
 

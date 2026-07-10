@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 /** 전송된 회의 초대 정보 — 알림 표시에 그대로 쓰이도록 표시용 문자열로 담는다. */
 export interface InviteInfo {
@@ -16,23 +23,41 @@ export interface InviteInfo {
   recommendedTime: string;
 }
 
+/**
+ * 화면을 보는 사람의 역할.
+ * organizer = 회의를 만든 주최자, invitee = 초대받은 참여자.
+ * UI는 같고 사이드바 알림 내용만 달라진다.
+ */
+export type ViewRole = "organizer" | "invitee";
+
 interface InviteContextValue {
   /** 아직 초대를 안 보냈으면 null */
   invite: InviteInfo | null;
   sendInvite: (info: InviteInfo) => void;
   clearInvite: () => void;
+  role: ViewRole;
+  toggleRole: () => void;
 }
 
 const InviteContext = createContext<InviteContextValue | null>(null);
 
 export function InviteProvider({ children }: { children: ReactNode }) {
   const [invite, setInvite] = useState<InviteInfo | null>(null);
+  const [role, setRole] = useState<ViewRole>("organizer");
+
+  const clearInvite = useCallback(() => setInvite(null), []);
+  const toggleRole = useCallback(
+    () => setRole((r) => (r === "organizer" ? "invitee" : "organizer")),
+    [],
+  );
+
+  const value = useMemo(
+    () => ({ invite, sendInvite: setInvite, clearInvite, role, toggleRole }),
+    [invite, clearInvite, role, toggleRole],
+  );
+
   return (
-    <InviteContext.Provider
-      value={{ invite, sendInvite: setInvite, clearInvite: () => setInvite(null) }}
-    >
-      {children}
-    </InviteContext.Provider>
+    <InviteContext.Provider value={value}>{children}</InviteContext.Provider>
   );
 }
 

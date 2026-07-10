@@ -17,6 +17,7 @@ import EventChip from "./EventChip";
 import { LocationIcon } from "./icons";
 import { useDayView } from "./DayViewContext";
 import { useWeekView } from "./WeekViewContext";
+import { useInvite } from "./InviteContext";
 
 /** 시간 일정 카드: 옅은 채움 배경 */
 const CARD_FILL: Record<EventColor, string> = {
@@ -89,7 +90,8 @@ export default function WeekGrid() {
 /** 날짜 숫자 + 종일(filled) 일정 칩 — 밴드 한 칸 */
 function WeekHeaderCell({ cell }: { cell: DayCell }) {
   const { openDay } = useDayView();
-  const allDay = eventsByDate(cell.date).filter((e) => e.chip === "filled");
+  const { role } = useInvite();
+  const allDay = eventsByDate(cell.date, role).filter((e) => e.chip === "filled");
 
   return (
     <div className="flex min-h-[80px] min-w-0 flex-1 flex-col gap-[8px] px-[6px] pb-[10px] pt-[9px]">
@@ -123,7 +125,8 @@ function WeekHeaderCell({ cell }: { cell: DayCell }) {
 
 /** 하루치 시간 일정 카드 스택 — 컬럼 한 칸 */
 function WeekTimedColumn({ cell }: { cell: DayCell }) {
-  const timed = eventsByDate(cell.date).filter((e) => e.chip !== "filled");
+  const { role } = useInvite();
+  const timed = eventsByDate(cell.date, role).filter((e) => e.chip !== "filled");
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-[8px] px-[6px]">

@@ -367,9 +367,52 @@ export const events: CalendarEvent[] = [
   { id: "e300", date: "2026-12-30", title: "최종 시안 승인", color: "red", chip: "line", startTime: "17:30", endTime: "18:30", location: "Zoom", attendeeCount: 4 },
 ];
 
+/** 화면을 보는 사람의 역할 — 주최자와 참여자는 서로 다른 캘린더를 본다 */
+export type ViewRole = "organizer" | "invitee";
+
+/**
+ * 참여자용 일정 — 이벤트 내용은 그대로 두고 놓이는 날짜만 전부 바꾼다.
+ *
+ * 같은 달 안에서 "일정이 있는 날"들을 한 칸씩 밀어(마지막은 처음으로) 만든다.
+ * 평일끼리, 주말끼리 따로 돌리므로 데일리 스탠드업이 주말로 가지 않고
+ * 주말에 어울리는 일정이 평일로 내려오지도 않는다. 달마다 평일 8~9일 ·
+ * 주말 2~3일이 차 있어 회전 후 모든 날짜가 원래와 달라진다.
+ */
+function rotateWithinMonth(list: CalendarEvent[]): CalendarEvent[] {
+  const isWeekend = (iso: string) => {
+    const day = new Date(iso + "T00:00:00").getDay();
+    return day === 0 || day === 6;
+  };
+
+  // 달 → (평일 날짜들, 주말 날짜들)
+  const byMonth = new Map<string, { weekday: string[]; weekend: string[] }>();
+  for (const iso of [...new Set(list.map((e) => e.date))].sort()) {
+    const month = iso.slice(0, 7);
+    const bucket = byMonth.get(month) ?? { weekday: [], weekend: [] };
+    (isWeekend(iso) ? bucket.weekend : bucket.weekday).push(iso);
+    byMonth.set(month, bucket);
+  }
+
+  const moved = new Map<string, string>();
+  for (const { weekday, weekend } of byMonth.values()) {
+    for (const dates of [weekday, weekend]) {
+      dates.forEach((iso, i) => moved.set(iso, dates[(i + 1) % dates.length]));
+    }
+  }
+
+  return list.map((e) => ({ ...e, date: moved.get(e.date) ?? e.date }));
+}
+
+const inviteeEvents = rotateWithinMonth(events);
+
+/** 역할별 일정 목록 */
+export function eventsFor(role: ViewRole): CalendarEvent[] {
+  return role === "invitee" ? inviteeEvents : events;
+}
+
 /** 특정 날짜의 이벤트 목록 */
-export function eventsByDate(date: string): CalendarEvent[] {
-  return events.filter((e) => e.date === date);
+export function eventsByDate(date: string, role: ViewRole = "organizer"): CalendarEvent[] {
+  return eventsFor(role).filter((e) => e.date === date);
 }
 
 /** 우측 아젠다에 노출할 날짜들 (오늘, 내일) */

@@ -88,6 +88,28 @@ export function ChatIcon({ className, size = 24 }: IconProps) {
   );
 }
 
+/** 주고받기 (Figma mage:exchange-a) — 위는 오른쪽, 아래는 왼쪽 화살표 */
+export function ExchangeIcon({ className, size = 24 }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M3.5 8.5h17m-3-3 3 3-3 3"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M20.5 15.5h-17m3-3-3 3 3 3"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function ChevronLeftIcon({ className, size = 24 }: IconProps) {
   return (
     <svg {...base(size)} className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
