@@ -88,13 +88,22 @@ export default function RequiredAttendeesView({
 
   // 기본 체크: 참석자/날짜가 바뀔 때 가능 시간대 중 처음 2개를 선택 상태로 초기화
   // (삭제로 인한 목록 변화에는 체크가 리셋되지 않도록 slots 기준으로만 초기화)
-  useEffect(() => {
-    const defaults = slots
-      .filter((slot) => slot.blockedBy.length === 0)
-      .slice(0, 2)
-      .map((slot) => slot.hour);
-    setCheckedHours(new Set(defaults));
-  }, [slots]);
+  //
+  // 이펙트가 아니라 렌더 중에 조정한다. 이펙트로 하면 한 번 잘못된 체크 상태로
+  // 그린 뒤 다시 그리게 된다. React가 권장하는 "이전 값과 비교해 렌더 중 조정" 패턴.
+  // 초기값 null — 첫 렌더에서도 기본 체크가 들어가도록.
+  const [prevSlots, setPrevSlots] = useState<typeof slots | null>(null);
+  if (prevSlots !== slots) {
+    setPrevSlots(slots);
+    setCheckedHours(
+      new Set(
+        slots
+          .filter((slot) => slot.blockedBy.length === 0)
+          .slice(0, 2)
+          .map((slot) => slot.hour),
+      ),
+    );
+  }
 
   function toggleHour(hour: number) {
     setCheckedHours((prev) => {
