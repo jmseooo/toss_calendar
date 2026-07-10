@@ -8,6 +8,8 @@ export interface InviteInfo {
   topic: string;
   /** 답장(초대)한 필수 참석자 이름 목록 */
   participants: string[];
+  /** 회의 날짜 ISO "YYYY-MM-DD" — 확정 화면에서 시간대를 다시 계산하는 데 쓴다 */
+  startDate: string;
   /** "07.09 (목)" 형태의 날짜 라벨 */
   dateLabel: string;
   /** 가장 많이 겹친 추천 시간 "11:00~12:00" */

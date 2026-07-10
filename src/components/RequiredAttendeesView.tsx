@@ -487,6 +487,7 @@ export default function RequiredAttendeesView({
               sendInvite({
                 topic: title,
                 participants,
+                startDate,
                 dateLabel: formatHeaderDate(startDate),
                 recommendedTime: recommended?.time ?? "",
               });

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { BellIcon, SearchIcon, ChatIcon } from "./icons";
 import { useInvite } from "./InviteContext";
+import MeetingConfirmView from "./MeetingConfirmView";
 
 /**
  * 좌측 사이드바 — 가로폭에 따라 비례 축소.
@@ -12,8 +13,10 @@ import { useInvite } from "./InviteContext";
  * 알림은 초대를 보낸 뒤에만 생긴다.
  */
 export default function Sidebar() {
-  const { invite } = useInvite();
+  const { invite, clearInvite } = useInvite();
   const [notifOpen, setNotifOpen] = useState(false);
+  // 알림을 누르면 "회의 일정 확정하기" 전체 화면이 열린다.
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const count = invite?.participants.length ?? 0;
 
@@ -87,9 +90,11 @@ export default function Sidebar() {
           {invite ? (
             <div className="mt-[14px] flex flex-col gap-[2px]">
               {invite.participants.map((name) => (
-                <div
+                <button
                   key={name}
-                  className="flex flex-col gap-[10px] rounded-[22px] px-[14px] py-[18px] transition-colors hover:bg-gray-100/60"
+                  type="button"
+                  onClick={() => setConfirmOpen(true)}
+                  className="flex flex-col gap-[10px] rounded-[22px] px-[14px] py-[18px] text-left transition-colors hover:bg-gray-100/60"
                 >
                   <div className="flex flex-col gap-[8px]">
                     <div className="flex items-center gap-[6px]">
@@ -106,7 +111,7 @@ export default function Sidebar() {
                   <p className="pl-[4px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-700">
                     {invite.dateLabel} {invite.recommendedTime}
                   </p>
-                </div>
+                </button>
               ))}
             </div>
           ) : (
@@ -115,6 +120,22 @@ export default function Sidebar() {
             </p>
           )}
         </div>
+      )}
+
+      {/* 회의 일정 확정하기 — 알림을 누를 때마다 초기 상태로 새로 마운트 */}
+      {invite && (
+        <MeetingConfirmView
+          key={confirmOpen ? "confirm-open" : "confirm-closed"}
+          open={confirmOpen}
+          invite={invite}
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={() => {
+            // 확정하면 알림을 소비하고 화면을 닫는다.
+            setConfirmOpen(false);
+            setNotifOpen(false);
+            clearInvite();
+          }}
+        />
       )}
     </aside>
   );
