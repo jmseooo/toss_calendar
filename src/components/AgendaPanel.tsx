@@ -88,7 +88,7 @@ function DayHeading({
     <h2
       style={{ animationDelay: `${delay}ms` }}
       className={`animate-agenda-cascade pl-[6px] text-[18px] font-semibold leading-[1.6] ${
-        active ? "text-carrot-600" : "text-gray-700"
+        active ? "text-carrot-600" : "text-black"
       }`}
     >
       {formatAgendaHeading(date)}
