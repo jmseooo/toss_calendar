@@ -1,11 +1,13 @@
 "use client";
 
+import { useRef } from "react";
 import {
   buildWeekGrid,
   TODAY,
   WEEKDAYS,
   type DayCell,
 } from "@/lib/calendar";
+import { useWheelPaging } from "@/lib/useWheelPaging";
 import {
   eventsByDate,
   type CalendarEvent,
@@ -41,11 +43,17 @@ const CARD_TEXT: Record<EventColor, string> = {
  * 월간·일별과 동일한 events 소스(eventsByDate)를 그대로 읽습니다.
  */
 export default function WeekGrid() {
-  const { anchor } = useWeekView();
+  const { anchor, goPrev, goNext } = useWeekView();
   const cells = buildWeekGrid(anchor, TODAY);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useWheelPaging(rootRef, goPrev, goNext); // 휠로 이전/다음 주
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[18px] bg-gray-00 shadow-card">
+    <div
+      ref={rootRef}
+      className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[18px] bg-gray-00 shadow-card"
+    >
       {/* 요일 헤더 */}
       <div className="flex px-[8px] pt-[15px] sm:px-[14px]">
         {WEEKDAYS.map((w) => (
