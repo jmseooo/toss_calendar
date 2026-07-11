@@ -73,9 +73,11 @@ export default function MeetingReplyView({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-[#f7f8f9] px-2 py-[24px]">
-      {/* 화면 정중앙에 놓는다. max-h-full 이라 세로가 짧아도 스크롤이 생기지 않고,
-          대신 shrink 가 걸린 카드만 줄어든다 (헤더와 CTA는 shrink-0). */}
+    // 위아래 여백은 시안(1024 프레임) 그대로 — 헤더 위 108px, CTA 아래 73px.
+    // 패딩이라 중앙 정렬과 같이 쓸 수 있고, 화면이 커지면 여백이 함께 늘어난다.
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-[#f7f8f9] px-2 pb-[73px] pt-[108px]">
+      {/* max-h-full 은 패딩을 뺀 영역 기준이라 여백을 지키면서도 스크롤이 생기지 않고,
+          세로가 모자라면 shrink 가 걸린 카드만 줄어든다 (헤더와 CTA는 shrink-0). */}
       <div className="flex max-h-full w-[589px] max-w-full flex-col">
         {/* ── 헤더 ── */}
         <div className="shrink-0 pl-[3px]">
@@ -93,23 +95,11 @@ export default function MeetingReplyView({
 
         {/* ── 카드 ── */}
         <div className="mt-[28px] flex h-[628px] min-h-0 flex-col overflow-hidden rounded-[36px] bg-white px-[32px] pt-[44px] shadow-card">
-          {/* 참석 라벨 + 참석자 칩 */}
-          <div className="flex flex-wrap items-center gap-[10px] pl-[3px]">
-            <span className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-700">
-              참석
+          {/* 후보 일정 라벨 + 전체 선택 */}
+          <div className="flex shrink-0 items-center justify-between">
+            <span className="pl-[3px] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-700">
+              후보 일정
             </span>
-            {participants.map((n) => (
-              <span
-                key={n}
-                className="flex h-[36px] shrink-0 items-center justify-center whitespace-nowrap rounded-[6px] border border-gray-300 px-[10px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800"
-              >
-                {n}
-              </span>
-            ))}
-          </div>
-
-          {/* 전체 선택 */}
-          <div className="mt-[24px] flex items-center justify-end">
             <button
               type="button"
               onClick={() =>
@@ -119,7 +109,7 @@ export default function MeetingReplyView({
                     : new Set(visible.map((s) => s.hour)),
                 )
               }
-              className="flex h-[36px] w-[116px] shrink-0 items-center justify-center rounded-[18px] bg-[#f7f8f9] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-1000 transition-colors hover:bg-gray-300/70"
+              className="flex h-[36px] w-[116px] shrink-0 items-center justify-center rounded-[18px] bg-[#f7f8f9] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-1000 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:bg-gray-300/70"
             >
               {allChecked ? "선택 해제" : "전체 선택"}
             </button>
@@ -136,54 +126,38 @@ export default function MeetingReplyView({
                 <div
                   key={slot.hour}
                   style={{ animationDelay: `${index * 45}ms` }}
-                  className="animate-slot-unfold relative flex shrink-0 items-center gap-[12px]"
+                  className="animate-slot-unfold flex shrink-0 items-center gap-[12px]"
                 >
-                  {/* 첫 행 위에만 말풍선 안내. 꼬리가 체크박스를 가리키도록
-                      오른쪽 끝을 체크박스에 맞추고 왼쪽으로 뻗는다. */}
-                  {index === 0 && (
-                    <div className="pointer-events-none absolute bottom-full left-[74px] z-10 flex -translate-x-full flex-col items-end pb-[4px]">
-                      <div className="whitespace-nowrap rounded-[12px] bg-gray-1000 p-[10px] text-[14px] font-semibold leading-[1.6] tracking-[-0.5px] text-[#f7f8f9]">
-                        이중에 정말 좋은 시간이 있다면, ‘좋아요’를 눌러주세요!
-                      </div>
-                      <div className="mr-[12px] size-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-gray-1000" />
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => setLiked((prev) => toggle(prev, slot.hour))}
-                    aria-pressed={isLiked}
-                    aria-label={`${slot.time} 좋아요`}
-                    className={`flex size-[40px] shrink-0 items-center justify-center transition-colors ${
-                      isLiked ? "text-carrot-600" : "text-gray-600 hover:text-gray-700"
-                    }`}
-                  >
-                    <StarIcon size={32} filled />
-                  </button>
-
                   <button
                     type="button"
                     onClick={() => setChecked((prev) => toggle(prev, slot.hour))}
                     aria-pressed={isOn}
                     aria-label={`${slot.time} 선택`}
-                    className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] transition-colors ${
+                    className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] ${
                       isOn ? "bg-[#6373ff] text-white" : "bg-gray-200 text-gray-600"
                     }`}
                   >
                     <CheckIcon size={18} />
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setChecked((prev) => toggle(prev, slot.hour))}
-                    className={`flex flex-1 items-center rounded-[22px] px-[24px] py-[18px] text-left transition-colors ${
-                      allFree
-                        ? "bg-[#f5f6ff]"
-                        : "border border-gray-400 hover:bg-gray-300/40"
+                  <div
+                    className={`flex flex-1 items-center gap-[8px] rounded-[22px] px-[24px] py-[18px] transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] ${
+                      allFree ? "bg-[#f5f6ff]" : "border border-gray-400"
                     }`}
                   >
-                    <div className="flex min-w-0 flex-1 flex-col gap-[10px]">
-                      <div className="flex gap-[6px]">
+                    <button
+                      type="button"
+                      onClick={() => setChecked((prev) => toggle(prev, slot.hour))}
+                      className="flex min-w-0 flex-1 flex-col items-start gap-[10px] text-left"
+                    >
+                      <span
+                        className={`text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] ${
+                          allFree ? "text-[#6373ff]" : "text-gray-1000"
+                        }`}
+                      >
+                        {slot.time}
+                      </span>
+                      <span className="flex gap-[6px]">
                         {allFree ? (
                           <>
                             <span className="rounded-[6px] bg-[#d8dcff] p-[6px] text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] text-[#6373ff]">
@@ -200,41 +174,51 @@ export default function MeetingReplyView({
                             {slot.blockedBy.length}명 불가능
                           </span>
                         )}
-                      </div>
-                      <span
-                        className={`text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] ${
-                          allFree ? "text-[#6373ff]" : "text-gray-1000"
-                        }`}
-                      >
-                        {slot.time}
                       </span>
-                    </div>
-                  </button>
+                    </button>
+
+                    {/* 좋아요 — 카드 안 오른쪽. 안 눌렀을 땐 배경에 은은히 묻힌다. */}
+                    <button
+                      type="button"
+                      onClick={() => setLiked((prev) => toggle(prev, slot.hour))}
+                      aria-pressed={isLiked}
+                      aria-label={`${slot.time} 좋아요`}
+                      className={`flex size-[44px] shrink-0 items-center justify-center transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] ${
+                        isLiked
+                          ? "text-carrot-600"
+                          : allFree
+                            ? "text-white hover:text-[#d8dcff]"
+                            : "text-gray-300 hover:text-gray-400"
+                      }`}
+                    >
+                      <StarIcon size={40} filled />
+                    </button>
+                  </div>
                 </div>
               );
             })}
 
             {!expanded && slots.length > INITIAL_SLOTS && (
-              /* pl 97px = 별 40 + 12 + 체크박스 33 + 12. 일정 카드 기준으로 가운데 온다. */
-              <div className="mt-[8px] flex shrink-0 justify-center pl-[97px]">
+              /* pl 45px = 체크박스 33 + gap 12. 위 일정 카드와 좌우를 맞춘다. */
+              <div className="mt-[4px] flex shrink-0 pl-[45px]">
                 <button
                   type="button"
                   onClick={() => setExpanded(true)}
-                  className="text-[14px] font-semibold leading-[1.3] tracking-[-0.5px] text-black hover:underline"
+                  className="flex h-[57px] flex-1 items-center justify-center rounded-[22px] border border-gray-400 text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-1000 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:bg-gray-300/40"
                 >
-                  다른 후보 일정 더보기
+                  다른 후보 더보기
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        {/* ── CTA ── */}
-        <div className="mt-[29px] flex shrink-0 items-center gap-[18px]">
+        {/* ── CTA ── 시안 기준 470px(226 + 18 + 226). 카드보다 좁게, 가운데. */}
+        <div className="mt-[29px] flex w-[470px] max-w-full shrink-0 items-center gap-[18px] self-center">
           <button
             type="button"
             onClick={onClose}
-            className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-[#f3f4f5] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition-colors hover:brightness-95"
+            className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-white text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95"
           >
             뒤로
           </button>
@@ -242,7 +226,7 @@ export default function MeetingReplyView({
             type="button"
             disabled={checked.size === 0}
             onClick={() => onSubmit([...checked].sort((a, b) => a - b))}
-            className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:brightness-100"
+            className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:brightness-100"
           >
             이 일정으로 전달하기
           </button>

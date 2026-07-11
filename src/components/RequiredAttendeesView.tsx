@@ -210,7 +210,7 @@ export default function RequiredAttendeesView({
         <button
           type="button"
           onClick={onClose}
-          className="mt-[30px] flex h-[57px] w-[136px] items-center justify-center rounded-[18px] bg-[#2a3038] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition-colors hover:brightness-110"
+          className="mt-[30px] flex h-[57px] w-[136px] items-center justify-center rounded-[18px] bg-[#2a3038] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-110"
         >
           홈으로
         </button>
@@ -271,7 +271,7 @@ export default function RequiredAttendeesView({
                   {results.map((name) => (
                     <div
                       key={name}
-                      className="group flex items-center justify-between rounded-[12px] px-[18px] py-[2px] transition-colors hover:bg-gray-100"
+                      className="group flex items-center justify-between rounded-[12px] px-[18px] py-[2px] transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-[11px]">
                         <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
@@ -302,7 +302,7 @@ export default function RequiredAttendeesView({
               {recent.map((name) => (
                 <div
                   key={name}
-                  className="group flex items-center justify-between rounded-[12px] px-[18px] py-[3px] transition-colors hover:bg-[#f7f8f9]"
+                  className="group flex items-center justify-between rounded-[12px] px-[18px] py-[3px] transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:bg-[#f7f8f9]"
                 >
                   <div className="flex items-center gap-[11px]">
                     <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
@@ -341,7 +341,7 @@ export default function RequiredAttendeesView({
                     type="button"
                     onClick={() => removeParticipant(n)}
                     aria-label={`${n} 삭제`}
-                    className="shrink-0 text-gray-500 transition-colors hover:text-gray-800"
+                    className="shrink-0 text-gray-500 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:text-gray-800"
                   >
                     <CloseIcon size={14} />
                   </button>
@@ -374,7 +374,7 @@ export default function RequiredAttendeesView({
                         type="button"
                         onClick={() => toggleHour(slot.hour)}
                         aria-pressed={isOn}
-                        className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] text-white transition-colors ${
+                        className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] ${
                           isOn ? "bg-[#6373ff]" : "bg-[#d6e4ff]"
                         }`}
                       >
@@ -419,7 +419,7 @@ export default function RequiredAttendeesView({
                       type="button"
                       onClick={() => toggleHour(slot.hour)}
                       aria-pressed={isOn}
-                      className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] transition-colors ${
+                      className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] ${
                         isOn ? "bg-[#6373ff] text-white" : "bg-gray-200 text-transparent"
                       }`}
                     >
@@ -476,7 +476,7 @@ export default function RequiredAttendeesView({
           <button
             type="button"
             onClick={onBack}
-            className="flex h-[57px] w-[183px] items-center justify-center rounded-[18px] bg-white text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition-colors hover:brightness-95"
+            className="flex h-[57px] w-[183px] items-center justify-center rounded-[18px] bg-white text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95"
           >
             뒤로
           </button>
@@ -493,7 +493,7 @@ export default function RequiredAttendeesView({
               });
               setSent(true);
             }}
-            className="flex h-[57px] w-[232px] items-center justify-center gap-[8px] rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition-colors hover:brightness-95"
+            className="flex h-[57px] w-[232px] items-center justify-center gap-[8px] rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95"
           >
             선택 날짜 초대 보내기
             <SendIcon size={20} />

@@ -59,7 +59,7 @@ export default function DatePickerPopover({
             aria-label="이전 달"
             disabled={atFirstMonth}
             onClick={() => shiftMonth(-1)}
-            className="text-gray-700 transition-colors hover:text-carrot-600 disabled:cursor-not-allowed disabled:text-[#e0e0e0] disabled:hover:text-[#e0e0e0]"
+            className="text-gray-700 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:text-carrot-600 disabled:cursor-not-allowed disabled:text-[#e0e0e0] disabled:hover:text-[#e0e0e0]"
           >
             <ChevronLeftIcon size={16} />
           </button>
@@ -70,7 +70,7 @@ export default function DatePickerPopover({
             type="button"
             aria-label="다음 달"
             onClick={() => shiftMonth(1)}
-            className="text-gray-700 transition-colors hover:text-carrot-600"
+            className="text-gray-700 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:text-carrot-600"
           >
             <ChevronRightIcon size={16} />
           </button>
@@ -104,7 +104,7 @@ export default function DatePickerPopover({
               >
                 <span
                   className={[
-                    "flex size-[30px] items-center justify-center rounded-full text-[16px] font-normal transition-colors",
+                    "flex size-[30px] items-center justify-center rounded-full text-[16px] font-normal transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98]",
                     selected
                       ? "bg-carrot-600 text-white"
                       : disabled

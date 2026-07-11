@@ -145,7 +145,7 @@ function WeekEventCard({ event }: { event: CalendarEvent }) {
     <button
       type="button"
       onClick={() => openDay(event.date)}
-      className={`flex w-full min-w-0 flex-col items-start gap-[8px] overflow-hidden rounded-[6px] px-[10px] py-[8px] text-left transition-[filter] hover:brightness-95 ${CARD_FILL[event.color]}`}
+      className={`transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex w-full min-w-0 flex-col items-start gap-[8px] overflow-hidden rounded-[6px] px-[10px] py-[8px] text-left hover:brightness-95 ${CARD_FILL[event.color]}`}
     >
       <div className="flex w-full min-w-0 flex-col gap-[2px]">
         {event.startTime && (

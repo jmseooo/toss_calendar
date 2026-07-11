@@ -60,9 +60,11 @@ export default function MeetingConfirmView({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-[#f7f8f9] px-2 py-[24px]">
-      {/* 화면 정중앙에 놓는다. max-h-full 이라 세로가 짧아도 스크롤이 생기지 않고,
-          대신 shrink 가 걸린 카드만 줄어든다 (헤더와 CTA는 shrink-0). */}
+    // 위아래 여백은 시안(1024 프레임) 그대로 — 헤더 위 108px, CTA 아래 73px.
+    // 패딩이라 중앙 정렬과 같이 쓸 수 있고, 화면이 커지면 여백이 함께 늘어난다.
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-[#f7f8f9] px-2 pb-[73px] pt-[108px]">
+      {/* max-h-full 은 패딩을 뺀 영역 기준이라 여백을 지키면서도 스크롤이 생기지 않고,
+          세로가 모자라면 shrink 가 걸린 카드만 줄어든다 (헤더와 CTA는 shrink-0). */}
       <div className="flex max-h-full w-[533px] max-w-full flex-col">
         {/* ── 헤더 ── */}
         <div className="shrink-0 pl-[3px]">
@@ -114,7 +116,7 @@ export default function MeetingConfirmView({
                     onClick={() => setSelected(slot.hour)}
                     aria-pressed={isOn}
                     aria-label={`${slot.time} 선택`}
-                    className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] transition-colors ${
+                    className={`flex size-[33px] shrink-0 items-center justify-center rounded-[8px] transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] ${
                       isOn ? "bg-[#6373ff] text-white" : "bg-gray-200 text-gray-600"
                     }`}
                   >
@@ -124,7 +126,7 @@ export default function MeetingConfirmView({
                   <button
                     type="button"
                     onClick={() => setSelected(slot.hour)}
-                    className={`flex flex-1 items-center gap-[8px] rounded-[22px] px-[24px] py-[18px] text-left transition-colors ${
+                    className={`flex flex-1 items-center gap-[8px] rounded-[22px] px-[24px] py-[18px] text-left transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] ${
                       allFree
                         ? "bg-[#f5f6ff]"
                         : "border border-gray-400 hover:bg-gray-300/40"
@@ -183,7 +185,7 @@ export default function MeetingConfirmView({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-[#f3f4f5] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition-colors hover:brightness-95"
+            className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-white text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95"
           >
             뒤로
           </button>
@@ -191,7 +193,7 @@ export default function MeetingConfirmView({
             type="button"
             disabled={selected === null}
             onClick={() => selected !== null && onConfirm(selected)}
-            className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:brightness-100"
+            className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:brightness-100"
           >
             일정 확정하기
           </button>

@@ -182,7 +182,7 @@ export default function MeetingCreateModal({
                     e.stopPropagation();
                     setPicker((p) => (p === "start" ? null : "start"));
                   }}
-                  className={`flex items-center justify-center rounded-[10px] bg-gray-300 px-[18px] py-[10px] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] transition-colors hover:brightness-95 ${
+                  className={`flex items-center justify-center rounded-[10px] bg-gray-300 px-[18px] py-[10px] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95 ${
                     startDate ? "text-gray-1000" : "text-gray-600"
                   }`}
                 >
@@ -197,7 +197,7 @@ export default function MeetingCreateModal({
                     e.stopPropagation();
                     setPicker((p) => (p === "end" ? null : "end"));
                   }}
-                  className={`flex items-center justify-center rounded-[10px] bg-gray-300 px-[18px] py-[10px] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] transition-colors hover:brightness-95 ${
+                  className={`flex items-center justify-center rounded-[10px] bg-gray-300 px-[18px] py-[10px] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95 ${
                     endDate ? "text-gray-1000" : "text-gray-600"
                   }`}
                 >
@@ -212,7 +212,7 @@ export default function MeetingCreateModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex h-[48px] w-[136px] items-center justify-center rounded-[18px] bg-[#f3f4f5] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition-colors hover:brightness-95"
+              className="flex h-[48px] w-[136px] items-center justify-center rounded-[18px] bg-[#f3f4f5] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95"
             >
               취소
             </button>
@@ -220,7 +220,7 @@ export default function MeetingCreateModal({
               type="button"
               onClick={goNext}
               disabled={!canProceed}
-              className="flex h-[48px] w-[136px] items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-00 transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:brightness-100"
+              className="flex h-[48px] w-[136px] items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-00 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:brightness-100"
             >
               다음
             </button>

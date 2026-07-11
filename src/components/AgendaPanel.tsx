@@ -67,7 +67,7 @@ export default function AgendaPanel() {
         <button
           type="button"
           onClick={toggleRole}
-          className="flex h-[42px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-full bg-gray-00 px-[14px] text-[15px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-700 transition-colors hover:bg-gray-300/50"
+          className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex h-[42px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-full bg-gray-00 px-[14px] text-[15px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-700 hover:bg-gray-300/50"
         >
           <ExchangeIcon size={20} />
           {role === "organizer" ? "초대자 화면" : "주최자 화면"}

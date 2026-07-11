@@ -73,7 +73,7 @@ export default function CalendarToolbar() {
             type="button"
             aria-label={isWeek ? "이전 주" : "이전 달"}
             onClick={goPrev}
-            className="text-gray-1000 transition-colors hover:text-carrot-600"
+            className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] text-gray-1000 hover:text-carrot-600"
           >
             <ChevronLeftIcon size={24} />
           </button>
@@ -81,7 +81,7 @@ export default function CalendarToolbar() {
             type="button"
             aria-label={isWeek ? "다음 주" : "다음 달"}
             onClick={goNext}
-            className="text-gray-1000 transition-colors hover:text-carrot-600"
+            className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] text-gray-1000 hover:text-carrot-600"
           >
             <ChevronRightIcon size={24} />
           </button>
@@ -92,7 +92,7 @@ export default function CalendarToolbar() {
           <button
             type="button"
             onClick={goToday}
-            className="flex h-[38px] w-[60px] shrink-0 items-center justify-center rounded-full border border-gray-300 bg-gray-00 text-[16px] font-semibold leading-[1.6] text-gray-1000 shadow-card transition-colors hover:bg-gray-300/50 xl:w-[72px]"
+            className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex h-[38px] w-[60px] shrink-0 items-center justify-center rounded-full border border-gray-300 bg-gray-00 text-[16px] font-semibold leading-[1.6] text-gray-1000 shadow-card hover:bg-gray-300/50 xl:w-[72px]"
           >
             오늘
           </button>
@@ -104,9 +104,9 @@ export default function CalendarToolbar() {
               aria-label="월간 보기"
               aria-pressed={mode === "month"}
               onClick={() => setMode("month")}
-              className={
+              className={`transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] ${
                 mode === "month" ? "text-gray-700" : "text-gray-400"
-              }
+              }`}
             >
               <LayoutMonthIcon size={24} />
             </button>
@@ -115,9 +115,9 @@ export default function CalendarToolbar() {
               aria-label="주간 보기"
               aria-pressed={mode === "week"}
               onClick={() => setMode("week")}
-              className={
+              className={`transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] ${
                 mode === "week" ? "text-gray-700" : "text-gray-400"
-              }
+              }`}
             >
               <LayoutWeekIcon size={24} />
             </button>
@@ -132,7 +132,7 @@ export default function CalendarToolbar() {
           aria-haspopup="menu"
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((prev) => !prev)}
-          className="flex h-[42px] w-[128px] shrink-0 items-center justify-center gap-[6px] whitespace-nowrap rounded-full bg-carrot-600 text-[15px] font-semibold text-gray-00 transition-colors hover:brightness-95 xl:w-[144px] xl:gap-[8px] xl:text-[16px]"
+          className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex h-[42px] w-[128px] shrink-0 items-center justify-center gap-[6px] whitespace-nowrap rounded-full bg-carrot-600 text-[15px] font-semibold text-gray-00 hover:brightness-95 xl:w-[144px] xl:gap-[8px] xl:text-[16px]"
         >
           <PlusIcon size={16} />
           일정 생성하기
@@ -161,7 +161,7 @@ export default function CalendarToolbar() {
                 setMenuOpen(false);
                 setMeetingOpen(true);
               }}
-              className="flex w-full items-center justify-center rounded-[12px] px-[14px] py-[6px] text-center text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition-colors hover:bg-gray-300/60"
+              className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex w-full items-center justify-center rounded-[12px] px-[14px] py-[6px] text-center text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 hover:bg-gray-300/60"
             >
               회의 생성
             </button>

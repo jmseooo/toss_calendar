@@ -68,7 +68,7 @@ export default function Sidebar() {
               aria-label="알림"
               aria-expanded={notifOpen}
               onClick={() => setNotifOpen((v) => !v)}
-              className={`block transition-colors hover:text-carrot-600 ${
+              className={`transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] block hover:text-carrot-600 ${
                 notifOpen ? "text-carrot-600" : ""
               }`}
             >
@@ -83,14 +83,14 @@ export default function Sidebar() {
           <button
             type="button"
             aria-label="검색"
-            className="transition-colors hover:text-carrot-600"
+            className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:text-carrot-600"
           >
             <SearchIcon />
           </button>
           <button
             type="button"
             aria-label="채팅"
-            className="transition-colors hover:text-carrot-600"
+            className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:text-carrot-600"
           >
             <ChatIcon />
           </button>
@@ -111,7 +111,7 @@ export default function Sidebar() {
                 <button
                   type="button"
                   onClick={() => setReplyOpen(true)}
-                  className="flex flex-col gap-[10px] rounded-[22px] px-[14px] py-[18px] text-left transition-colors hover:bg-gray-100/60"
+                  className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex flex-col gap-[10px] rounded-[22px] px-[14px] py-[18px] text-left hover:bg-gray-100/60"
                 >
                   <div className="flex flex-col gap-[8px]">
                     <div className="flex items-start gap-[6px]">
@@ -134,7 +134,7 @@ export default function Sidebar() {
                 <button
                   type="button"
                   onClick={() => setConfirmOpen(true)}
-                  className="flex flex-col gap-[8px] rounded-[22px] px-[14px] py-[18px] text-left transition-colors hover:bg-gray-100/60"
+                  className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex flex-col gap-[8px] rounded-[22px] px-[14px] py-[18px] text-left hover:bg-gray-100/60"
                 >
                   <div className="flex items-center gap-[8px]">
                     <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
