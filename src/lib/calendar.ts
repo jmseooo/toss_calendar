@@ -13,13 +13,23 @@ export function toISODate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-const NOW = new Date();
+/**
+ * 데모의 기준 "오늘" — 고정 값이다.
+ *
+ * new Date()로 실시간 계산하면 안 된다. 이 앱은 SSR(Next)인데, 서버 프로세스가
+ * 뜬 시각과 브라우저가 로드한 시각이 자정을 사이에 두면 서버 HTML과 클라이언트
+ * 첫 렌더의 날짜가 어긋나 하이드레이션이 깨진다(서버/클라 타임존이 달라도 마찬가지).
+ * 게다가 일정 데이터가 2026년으로 고정돼 있어, 실시간 오늘은 곧 시드 밖으로 벗어난다.
+ *
+ * 그래서 시안 배치(7/10=오늘 5건, 7/11=내일 3건)에 맞춰 2026-07-10으로 고정한다.
+ */
+const REFERENCE = new Date(2026, 6, 10); // 월은 0부터 → 6 = 7월
 
-/** 화면에 표시할 기준 연·월 (실제 현재 월) */
-export const VIEW_YEAR = NOW.getFullYear();
-export const VIEW_MONTH = NOW.getMonth() + 1; // 1부터 시작
-/** 오늘 날짜 (실제 오늘) */
-export const TODAY = toISODate(NOW);
+/** 화면에 표시할 기준 연·월 */
+export const VIEW_YEAR = REFERENCE.getFullYear();
+export const VIEW_MONTH = REFERENCE.getMonth() + 1; // 1부터 시작
+/** 기준 "오늘" 날짜 */
+export const TODAY = toISODate(REFERENCE);
 
 export interface DayCell {
   /** ISO 날짜 문자열 (YYYY-MM-DD) */
