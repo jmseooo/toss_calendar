@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import type { CalendarEvent } from "@/data/events";
 
 /** 전송된 회의 초대 정보 — 알림 표시에 그대로 쓰이도록 표시용 문자열로 담는다. */
 export interface InviteInfo {
@@ -44,6 +45,11 @@ interface InviteContextValue {
   /** 참여자가 보낸 답변 — 아직 안 보냈으면 null. 주최자의 "일정 확정" 알림은 이때부터 뜬다 */
   reply: ReplySelection | null;
   submitReply: (hours: number[], liked: number[]) => void;
+  /** 주최자가 확정해 캘린더에 올린 회의들 */
+  confirmedEvents: CalendarEvent[];
+  /** 방금 확정한 이벤트 id — 캘린더에서 펼침 애니메이션 대상 */
+  lastConfirmedId: string | null;
+  confirmMeeting: (event: CalendarEvent) => void;
   role: ViewRole;
   toggleRole: () => void;
 }
@@ -53,6 +59,8 @@ const InviteContext = createContext<InviteContextValue | null>(null);
 export function InviteProvider({ children }: { children: ReactNode }) {
   const [invite, setInvite] = useState<InviteInfo | null>(null);
   const [reply, setReply] = useState<ReplySelection | null>(null);
+  const [confirmedEvents, setConfirmedEvents] = useState<CalendarEvent[]>([]);
+  const [lastConfirmedId, setLastConfirmedId] = useState<string | null>(null);
   const [role, setRole] = useState<ViewRole>("organizer");
 
   // 새 초대를 보내면 답변을 초기화한다.
@@ -68,14 +76,40 @@ export function InviteProvider({ children }: { children: ReactNode }) {
     (hours: number[], liked: number[]) => setReply({ hours, liked }),
     [],
   );
+  const confirmMeeting = useCallback((event: CalendarEvent) => {
+    setConfirmedEvents((prev) => [...prev, event]);
+    setLastConfirmedId(event.id);
+  }, []);
   const toggleRole = useCallback(
     () => setRole((r) => (r === "organizer" ? "invitee" : "organizer")),
     [],
   );
 
   const value = useMemo(
-    () => ({ invite, sendInvite, clearInvite, reply, submitReply, role, toggleRole }),
-    [invite, sendInvite, clearInvite, reply, submitReply, role, toggleRole],
+    () => ({
+      invite,
+      sendInvite,
+      clearInvite,
+      reply,
+      submitReply,
+      confirmedEvents,
+      lastConfirmedId,
+      confirmMeeting,
+      role,
+      toggleRole,
+    }),
+    [
+      invite,
+      sendInvite,
+      clearInvite,
+      reply,
+      submitReply,
+      confirmedEvents,
+      lastConfirmedId,
+      confirmMeeting,
+      role,
+      toggleRole,
+    ],
   );
 
   return (

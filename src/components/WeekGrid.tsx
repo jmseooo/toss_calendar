@@ -33,6 +33,15 @@ const CARD_TEXT: Record<EventColor, string> = {
   teal: "text-ev-teal",
 };
 
+/** 확정 강조용 진한 색 (오버레이) */
+const CARD_STRONG: Record<EventColor, string> = {
+  blue: "bg-ev-blue",
+  pink: "bg-ev-pink",
+  purple: "bg-ev-purple",
+  red: "bg-ev-red",
+  teal: "bg-ev-teal",
+};
+
 /**
  * 주간 캘린더 카드 — Figma 시안(node 243:7903) 기준.
  * 요일 헤더 · 날짜/종일 밴드 · 구분선 · 요일별 시간 일정 컬럼으로 구성됩니다.
@@ -121,28 +130,52 @@ function WeekHeaderCell({ cell }: { cell: DayCell }) {
 
 /** 하루치 시간 일정 카드 스택 — 컬럼 한 칸 */
 function WeekTimedColumn({ cell }: { cell: DayCell }) {
-  const { role } = useInvite();
-  const timed = eventsByDate(cell.date, role).filter((e) => e.chip !== "filled");
+  const { role, confirmedEvents, lastConfirmedId } = useInvite();
+  // 시드 일정 + 이 날 확정된 회의를 합친다. 확정 회의는 chip: "line" 이라 시간 컬럼에 온다.
+  const confirmed = confirmedEvents.filter((e) => e.date === cell.date);
+  const timed = [...eventsByDate(cell.date, role), ...confirmed].filter(
+    (e) => e.chip !== "filled",
+  );
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-[8px] px-[6px]">
       {timed.map((ev) => (
-        <WeekEventCard key={ev.id} event={ev} />
+        <WeekEventCard
+          key={ev.id}
+          event={ev}
+          // 방금 확정한 블록만 펼쳐지며 나타난다
+          justAdded={ev.id === lastConfirmedId}
+        />
       ))}
     </div>
   );
 }
 
 /** 시간 일정 카드 — 시간 · 제목 · 장소 */
-function WeekEventCard({ event }: { event: CalendarEvent }) {
+function WeekEventCard({
+  event,
+  justAdded = false,
+}: {
+  event: CalendarEvent;
+  justAdded?: boolean;
+}) {
   const { openDay } = useDayView();
 
   return (
     <button
       type="button"
       onClick={() => openDay(event.date)}
-      className={`transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex w-full min-w-0 flex-col items-start gap-[8px] overflow-hidden rounded-[6px] px-[10px] py-[8px] text-left hover:brightness-95 ${CARD_FILL[event.color]}`}
+      className={`relative transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex w-full min-w-0 flex-col items-start gap-[8px] overflow-hidden rounded-[6px] px-[10px] py-[8px] text-left hover:brightness-95 ${CARD_FILL[event.color]} ${
+        justAdded ? "animate-block-unfold" : ""
+      }`}
     >
+      {/* 확정 강조 — 진한 색이 잠깐 덮였다가 사라지며 원래 색을 드러낸다 */}
+      {justAdded && (
+        <span
+          className={`animate-confirm-glow pointer-events-none absolute inset-0 rounded-[6px] ${CARD_STRONG[event.color]}`}
+        />
+      )}
+
       <div className="flex w-full min-w-0 flex-col gap-[2px]">
         {event.startTime && (
           <p className="truncate text-[13px] font-semibold leading-[1.3] text-gray-1000">

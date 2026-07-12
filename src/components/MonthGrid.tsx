@@ -49,10 +49,13 @@ export default function MonthGrid() {
 
 function DayCellView({ cell }: { cell: DayCell }) {
   const { selectedDate, openDay } = useDayView();
-  const { role } = useInvite();
+  const { role, confirmedEvents } = useInvite();
   const isSelected = selectedDate === cell.date;
   const [hovered, setHovered] = useState(false);
-  const dayEvents = eventsByDate(cell.date, role);
+  const dayEvents = [
+    ...eventsByDate(cell.date, role),
+    ...confirmedEvents.filter((e) => e.date === cell.date),
+  ];
   const visible = dayEvents.slice(0, MAX_VISIBLE);
   const overflow = dayEvents.length - visible.length;
 

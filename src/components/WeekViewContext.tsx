@@ -25,6 +25,8 @@ interface WeekViewContextValue {
   goNext: () => void;
   /** 오늘이 속한 주로 이동 */
   goToday: () => void;
+  /** 특정 날짜가 속한 주로 이동 */
+  goToDate: (iso: string) => void;
 }
 
 const WeekViewContext = createContext<WeekViewContextValue | null>(null);
@@ -47,10 +49,11 @@ export function WeekViewProvider({ children }: { children: ReactNode }) {
   const goPrev = useCallback(() => setAnchor((a) => addDays(a, -7)), []);
   const goNext = useCallback(() => setAnchor((a) => addDays(a, 7)), []);
   const goToday = useCallback(() => setAnchor(today), [today]);
+  const goToDate = useCallback((iso: string) => setAnchor(iso), []);
 
   const value = useMemo(
-    () => ({ anchor, goPrev, goNext, goToday }),
-    [anchor, goPrev, goNext, goToday],
+    () => ({ anchor, goPrev, goNext, goToday, goToDate }),
+    [anchor, goPrev, goNext, goToday, goToDate],
   );
 
   return (

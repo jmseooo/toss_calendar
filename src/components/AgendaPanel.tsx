@@ -131,10 +131,11 @@ function DayCard({
   delay: number;
 }) {
   // 종일(블록) 일정을 맨 위로, 나머지(시간 일정)는 원래 순서 유지.
-  const { role } = useInvite();
-  const dayEvents = [...eventsByDate(date, role)].sort(
-    (a, b) => (a.chip === "filled" ? 0 : 1) - (b.chip === "filled" ? 0 : 1),
-  );
+  const { role, confirmedEvents } = useInvite();
+  const dayEvents = [
+    ...eventsByDate(date, role),
+    ...confirmedEvents.filter((e) => e.date === date),
+  ].sort((a, b) => (a.chip === "filled" ? 0 : 1) - (b.chip === "filled" ? 0 : 1));
 
   // 안쪽 일정은 흰 카드가 뜬 직후부터 한 장씩 젖혀진다.
   const cardDelay = delay + CARD_OFFSET;

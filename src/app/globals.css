@@ -76,6 +76,39 @@
   animation: slot-unfold 0.32s ease-out both;
 }
 
+/* 확정된 회의 블록 — 위에서부터 세로로 펼쳐지며 생긴다 */
+@keyframes block-unfold {
+  0% {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+.animate-block-unfold {
+  transform-origin: top center;
+  animation: block-unfold 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 확정 강조 — 진한 색으로 잠깐 덮였다가 서서히 사라지며 원래 연한 색을 드러낸다 */
+@keyframes confirm-glow {
+  0%,
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.animate-confirm-glow {
+  animation: confirm-glow 1.5s ease-out both;
+}
+
 /* 아젠다 촤라락 — 날짜를 새로 고르면 헤딩·일정 카드가 위에서부터
    차례로 젖혀지며 펼쳐진다. perspective를 keyframe 안에 넣어
    조상 요소의 display:contents 여부와 무관하게 원근이 적용되게 한다. */
@@ -143,6 +176,8 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-view-enter,
   .animate-slot-unfold,
+  .animate-block-unfold,
+  .animate-confirm-glow,
   .animate-agenda-cascade,
   .animate-agenda-fade,
   .animate-trace-border {

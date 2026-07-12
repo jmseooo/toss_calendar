@@ -4,6 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { BellIcon, SearchIcon, ChatIcon } from "./icons";
 import { useInvite } from "./InviteContext";
+import { useViewMode } from "./ViewModeContext";
+import { useWeekView } from "./WeekViewContext";
 import { SELF } from "@/data/people";
 import { WEEKDAYS } from "@/lib/calendar";
 import MeetingConfirmView from "./MeetingConfirmView";
@@ -15,6 +17,9 @@ function formatShortDate(iso: string): string {
   return `${d.getMonth() + 1}/${d.getDate()} (${WEEKDAYS[d.getDay()]})`;
 }
 
+/** 09 → "09:00" */
+const hourLabel = (h: number) => `${String(h).padStart(2, "0")}:00`;
+
 /**
  * 좌측 사이드바 — 가로폭에 따라 비례 축소.
  * 아이콘 열 너비: 52px(기본) → 62px(sm) → 72px(xl). aside와 아이콘 열의 너비는 같아야 한다.
@@ -22,7 +27,10 @@ function formatShortDate(iso: string): string {
  * 알림은 초대를 보낸 뒤에만 생긴다.
  */
 export default function Sidebar() {
-  const { invite, clearInvite, role, reply, submitReply } = useInvite();
+  const { invite, clearInvite, role, reply, submitReply, confirmMeeting } =
+    useInvite();
+  const { setMode } = useViewMode();
+  const { goToDate } = useWeekView();
   const replied = reply !== null;
   const [notifOpen, setNotifOpen] = useState(false);
   // 알림을 누르면 "회의 일정 확정하기" 전체 화면이 열린다.
@@ -220,11 +228,26 @@ export default function Sidebar() {
           // 초대자가 좋아요한 시간대를 우선, 없으면 첫 번째 선택한 시간대를 기본 선택으로
           initialHour={reply?.liked[0] ?? reply?.hours[0]}
           onClose={() => setConfirmOpen(false)}
-          onConfirm={() => {
-            // 확정하면 알림을 소비하고 화면을 닫는다.
+          onConfirm={(hour) => {
+            // 확정한 회의를 캘린더 이벤트로 만든다.
+            const event = {
+              id: `confirmed-${invite.startDate}-${hour}`,
+              date: invite.startDate,
+              title: invite.topic,
+              color: "blue" as const,
+              chip: "line" as const,
+              startTime: hourLabel(hour),
+              endTime: hourLabel(hour + 1),
+              attendeeCount: invite.participants.length,
+            };
+            // 먼저 주간 뷰의 그 주로 전환하고 오버레이를 닫는다.
+            goToDate(invite.startDate);
+            setMode("week");
             setConfirmOpen(false);
             setNotifOpen(false);
             clearInvite();
+            // 뷰 전환이 끝난 뒤 블록을 얹어야 펼침 애니메이션이 화면에서 보인다.
+            window.setTimeout(() => confirmMeeting(event), 280);
           }}
         />
       )}
