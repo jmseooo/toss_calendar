@@ -53,6 +53,8 @@ export default function MeetingConfirmView({
       ? initialHour
       : (slots[0]?.hour ?? null);
   const [selected, setSelected] = useState<number | null>(defaultHour);
+  // 확정하기를 누르면 완료 화면으로 전환한다.
+  const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -64,6 +66,73 @@ export default function MeetingConfirmView({
   }, [open, onClose]);
 
   if (!open) return null;
+
+  const selectedTime = slots.find((s) => s.hour === selected)?.time ?? "";
+
+  // ── 확정 완료 화면 (Figma 243:7319 계열) ──
+  if (confirmed) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-auto px-[24px] py-[40px]"
+        style={{
+          background:
+            "radial-gradient(120% 80% at 50% -10%, #ffe9dd 0%, #ffffff 55%)",
+        }}
+      >
+        <div className="flex size-[92px] items-center justify-center rounded-full bg-[#ff9364] text-white">
+          <CheckIcon size={44} />
+        </div>
+        <h1 className="mt-[24px] text-center text-[28px] font-bold leading-[1.5] tracking-[-0.5px] text-gray-1000">
+          회의 일정을 확정하고,
+          <br />
+          필수 참석자들에게 알렸어요
+        </h1>
+
+        <div className="mt-[36px] flex w-[738px] max-w-full flex-col items-center gap-[20px] rounded-[30px] bg-white px-[40px] py-[36px] shadow-card">
+          <div className="flex items-center gap-[10px]">
+            <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-600">
+              {topic}
+            </span>
+            <span className="size-[6px] rounded-full bg-[#cfd4dd]" />
+            <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-600">
+              {dateLabel} {selectedTime}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-[12px]">
+            {participants.map((n, i) => (
+              <div
+                key={`${n}-${i}`}
+                className="flex items-center gap-[11px] rounded-[16px] border border-gray-300 bg-white px-[16px] py-[10px]"
+              >
+                <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
+                <span className="whitespace-nowrap text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
+                  {n}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-[36px] flex items-center gap-[18px]">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-[57px] w-[228px] items-center justify-center rounded-[18px] bg-white text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-carrot-600 shadow-card transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95"
+          >
+            참석자 추가하기
+          </button>
+          <button
+            type="button"
+            onClick={() => selected !== null && onConfirm(selected)}
+            className="flex h-[57px] w-[228px] items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95"
+          >
+            캘린더에서 보기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     // 위아래 여백은 시안(1024 프레임) 그대로 — 헤더 위 108px, CTA 아래 73px.
@@ -198,7 +267,7 @@ export default function MeetingConfirmView({
           <button
             type="button"
             disabled={selected === null}
-            onClick={() => selected !== null && onConfirm(selected)}
+            onClick={() => selected !== null && setConfirmed(true)}
             className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:brightness-100"
           >
             일정 확정하기
