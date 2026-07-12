@@ -173,6 +173,39 @@
   animation: trace-border 5s linear infinite;
 }
 
+/* 임시(가) 일정 카드 테두리 — 한 획이 둘레를 한 바퀴 그리고 사라진다 (pathLength=1 정규화). */
+@keyframes dash-draw {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  70% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+.animate-dash-draw {
+  animation: dash-draw 0.65s ease-out both;
+}
+
+/* 획이 다 그려질 즈음 점선 테두리가 나타난다. */
+@keyframes dash-appear {
+  0%,
+  55% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.animate-dash-appear {
+  animation: dash-appear 0.7s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-view-enter,
   .animate-slot-unfold,
@@ -180,7 +213,9 @@
   .animate-confirm-glow,
   .animate-agenda-cascade,
   .animate-agenda-fade,
-  .animate-trace-border {
+  .animate-trace-border,
+  .animate-dash-draw,
+  .animate-dash-appear {
     animation: none;
   }
 }

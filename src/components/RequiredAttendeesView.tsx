@@ -309,13 +309,16 @@ export default function RequiredAttendeesView({
                       {name}
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => addParticipant(name)}
-                    className="flex h-[28px] w-[52px] items-center justify-center rounded-[12px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 opacity-0 transition-opacity group-hover:opacity-100"
-                  >
-                    추가
-                  </button>
+                  {/* 이미 추가한 참석자에겐 추가 버튼을 보이지 않는다 */}
+                  {!participants.includes(name) && (
+                    <button
+                      type="button"
+                      onClick={() => addParticipant(name)}
+                      className="flex h-[28px] w-[52px] items-center justify-center rounded-[12px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 opacity-0 transition-opacity group-hover:opacity-100"
+                    >
+                      추가
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

@@ -161,30 +161,71 @@ function WeekEventCard({
 }) {
   const { openDay } = useDayView();
 
-  // 임시(가) 일정 — 주황 점선 카드 (Figma 243:9275). 탭하면 펼침 애니메이션과 함께 생긴다.
+  // 임시(가) 일정 — 주황 점선 카드 (Figma 243:9275). 탭하면 펼침 애니메이션과 함께 생기고,
+  // 점선 테두리는 한 획이 둘레를 한 바퀴 그린 뒤 점선으로 남는다.
   if (event.tentative) {
     return (
       <button
         type="button"
         onClick={() => openDay(event.date)}
-        className={`flex w-full min-w-0 flex-col gap-[6px] rounded-[6px] border border-dashed border-carrot-600 bg-gray-00 px-[10px] py-[8px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+        className={`relative flex w-full min-w-0 flex-col gap-[6px] rounded-[6px] bg-gray-00 px-[10px] py-[8px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98] ${
           justAdded ? "animate-block-unfold" : ""
         }`}
       >
+        {/* 테두리 — SVG 획으로 그린다 (pathLength=1 정규화라 카드 크기와 무관) */}
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+        >
+          {/* 최종 점선 테두리 — 획이 다 그려질 즈음 나타난다 */}
+          <rect
+            x="0.5"
+            y="0.5"
+            width="99"
+            height="99"
+            rx="6"
+            fill="none"
+            stroke="#ff6600"
+            strokeWidth="1"
+            vectorEffect="non-scaling-stroke"
+            strokeDasharray="4 4"
+            className={justAdded ? "animate-dash-appear" : ""}
+          />
+          {/* 그려지는 획 — 한 바퀴 돌고 사라진다 (처음 생길 때만) */}
+          {justAdded && (
+            <rect
+              x="0.5"
+              y="0.5"
+              width="99"
+              height="99"
+              rx="6"
+              fill="none"
+              stroke="#ff6600"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+              pathLength={1}
+              strokeDasharray="1"
+              className="animate-dash-draw"
+            />
+          )}
+        </svg>
         <div className="flex min-w-0 flex-col gap-[2px]">
           {event.startTime && (
-            <p className="truncate text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] text-[#471601]">
+            <p className="text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] text-[#471601]">
               {event.startTime}~{event.endTime}
             </p>
           )}
-          <p className="truncate text-[15px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600">
+          <p className="text-[15px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600">
             {event.title}
           </p>
         </div>
         {event.location && (
-          <div className="flex min-w-0 items-center gap-px text-gray-800">
-            <LocationIcon size={13} className="shrink-0" />
-            <span className="truncate text-[13px] font-semibold leading-[1.3] tracking-[-0.5px]">
+          <div className="flex min-w-0 items-start gap-px text-gray-800">
+            <LocationIcon size={13} className="mt-[1px] shrink-0" />
+            <span className="min-w-0 flex-1 text-[13px] font-semibold leading-[1.3] tracking-[-0.5px]">
               {event.location}
             </span>
           </div>

@@ -192,24 +192,31 @@ export default function MeetingInviteView({
               최근검색
             </p>
             <div className="mt-[11px] flex flex-col gap-[10px]">
-              {recent.map((name) => (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => add(name)}
-                  className="group flex items-center justify-between rounded-[12px] px-[18px] py-[3px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98] hover:bg-[#f7f8f9]"
-                >
-                  <div className="flex items-center gap-[11px]">
-                    <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
-                    <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-900">
-                      {name}
-                    </span>
-                  </div>
-                  <span className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 opacity-0 transition-opacity group-hover:opacity-100">
-                    추가
-                  </span>
-                </button>
-              ))}
+              {recent.map((name) => {
+                const added = selected.includes(name);
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    disabled={added}
+                    onClick={() => add(name)}
+                    className="group flex items-center justify-between rounded-[12px] px-[18px] py-[3px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98] hover:bg-[#f7f8f9] disabled:pointer-events-none"
+                  >
+                    <div className="flex items-center gap-[11px]">
+                      <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
+                      <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-900">
+                        {name}
+                      </span>
+                    </div>
+                    {/* 이미 추가한 사람에겐 추가 표시를 보이지 않는다 */}
+                    {!added && (
+                      <span className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 opacity-0 transition-opacity group-hover:opacity-100">
+                        추가
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
