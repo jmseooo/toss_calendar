@@ -43,6 +43,8 @@ export interface CalendarEvent {
   link?: string;
   /** 참석자 수 — 우측 아젠다 카드의 아바타 그룹 표시용 (선택) */
   attendeeCount?: number;
+  /** 아직 참석 확정 전의 임시(가) 일정 — 주황 점선 카드로 그린다 (선택) */
+  tentative?: boolean;
 }
 
 export const events: CalendarEvent[] = [
@@ -429,6 +431,25 @@ function relocateWithinMonth(list: CalendarEvent[]): CalendarEvent[] {
 
   return list.map((e) => ({ ...e, date: moved.get(e.date) ?? e.date }));
 }
+
+/**
+ * 참여자가 "선택 참여자"로 초대받은 임시(가) 일정.
+ * 사이드바 알림을 탭하면 주간 뷰로 전환하며 이 일정이 애니메이션과 함께 임시로 생긴다.
+ * 아직 참석을 확정하지 않았으므로 주황 점선 카드(tentative)로 그린다 (Figma 243:9275).
+ * 캘린더에 상시로 있지 않고, 탭했을 때만 InviteContext 를 통해 주간 뷰에 합쳐진다.
+ */
+export const OPTIONAL_MEETING_DATE = "2026-07-15";
+export const OPTIONAL_MEETING_EVENT: CalendarEvent = {
+  id: "opt-design-meeting",
+  date: OPTIONAL_MEETING_DATE,
+  title: "디자인팀 회의",
+  color: "red",
+  chip: "line",
+  startTime: "10:00",
+  endTime: "10:30",
+  location: "UT룸",
+  tentative: true,
+};
 
 const inviteeEvents = relocateWithinMonth(events);
 

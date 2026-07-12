@@ -7,6 +7,7 @@ import { useInvite } from "./InviteContext";
 import { useViewMode } from "./ViewModeContext";
 import { useWeekView } from "./WeekViewContext";
 import { SELF } from "@/data/people";
+import { OPTIONAL_MEETING_DATE } from "@/data/events";
 import { WEEKDAYS } from "@/lib/calendar";
 import MeetingConfirmView from "./MeetingConfirmView";
 import MeetingReplyView from "./MeetingReplyView";
@@ -37,6 +38,7 @@ export default function Sidebar() {
     submitReply,
     confirmMeeting,
     markOptionalSent,
+    revealOptionalMeeting,
     role,
   } = useInvite();
   const { setMode } = useViewMode();
@@ -72,8 +74,22 @@ export default function Sidebar() {
   const [optionalAnswer, setOptionalAnswer] = useState<
     "attend" | "decline" | null
   >(null);
+  // 카드 자체를 탭하면 선택 상태(그라데이션 배경)로 바뀐다.
+  const [optionalSelected, setOptionalSelected] = useState(false);
+  // 미참석을 누르면 확인 알럿을 띄운다.
+  const [declineAlertOpen, setDeclineAlertOpen] = useState(false);
   // 시드 알림 발생 시각 — 최신순 정렬용. 마운트 시점으로 고정한다.
   const [seedAt] = useState(() => Date.now());
+
+  // 선택 참여자 초대 카드 탭 → 선택 강조 + 주간 뷰로 전환해 '디자인 미팅' 포커싱.
+  const openOptional = () => {
+    markRead("opt-design-meeting");
+    setOptionalSelected(true);
+    setMode("week");
+    goToDate(OPTIONAL_MEETING_DATE);
+    // 주간 뷰로 옮긴 뒤 임시 일정을 얹어야 펼침 애니메이션이 보인다.
+    window.setTimeout(() => revealOptionalMeeting(), 280);
+  };
 
   const replyMtg = meetings.find((m) => m.id === replyMeetingId) ?? null;
   const confirmMtg = meetings.find((m) => m.id === confirmMeetingId) ?? null;
@@ -207,13 +223,39 @@ export default function Sidebar() {
 
   // 참여자 뷰에선 다른 회의의 "선택 참여자 초대"도 함께 받는다 (Figma 243:5768).
   // 주최자가 만든 회의 초대와 별개인 시드 알림 — 참석/미참석만 답한다.
+  // 발생 시각은 가장 최근 필수 초대 바로 아래에 오도록 맞춘다 (필수 초대와 "동시에" 노출).
   if (isInvitee) {
     const key = "opt-design-meeting";
+    const latestInviteAt = meetings.reduce(
+      (mx, m) => Math.max(mx, m.createdAt),
+      0,
+    );
     items.push({
       key,
-      at: seedAt,
+      at: latestInviteAt > 0 ? latestInviteAt - 1 : seedAt,
       node: (
-        <div className="flex w-full flex-col gap-[8px] rounded-[22px] px-[14px] py-[18px] text-left">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={openOptional}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              openOptional();
+            }
+          }}
+          className={`flex w-full cursor-pointer flex-col gap-[8px] rounded-[18px] px-[14px] py-[18px] text-left transition duration-150 ease-out ${
+            optionalSelected ? "" : "hover:bg-gray-100/60"
+          }`}
+          style={
+            optionalSelected
+              ? {
+                  backgroundImage:
+                    "linear-gradient(161.75deg, rgb(255,239,228) 18.345%, rgb(255,238,198) 100.3%)",
+                }
+              : undefined
+          }
+        >
           <div className="flex flex-col gap-[8px]">
             <div className="flex items-start gap-[6px]">
               <span className="size-[24px] shrink-0 rounded-full bg-gray-600" />
@@ -234,17 +276,20 @@ export default function Sidebar() {
               <div className="flex w-[226px] gap-[10px]">
                 <button
                   type="button"
-                  onClick={() => {
-                    markRead(key);
-                    setOptionalAnswer("decline");
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeclineAlertOpen(true);
                   }}
-                  className="flex h-[31px] flex-1 items-center justify-center rounded-[8px] bg-[#f3f4f5] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-black transition duration-150 ease-out hover:brightness-95 active:scale-[0.98]"
+                  className={`flex h-[31px] flex-1 items-center justify-center rounded-[8px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-black transition duration-150 ease-out hover:brightness-95 active:scale-[0.98] ${
+                    optionalSelected ? "bg-white" : "bg-[#f3f4f5]"
+                  }`}
                 >
                   미참석
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     markRead(key);
                     setOptionalAnswer("attend");
                   }}
@@ -421,6 +466,48 @@ export default function Sidebar() {
             setNotifOpen(false);
           }}
         />
+      )}
+
+      {/* 미참석 확인 알럿 (Figma 414:1598) */}
+      {declineAlertOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 px-[24px]"
+          onClick={() => setDeclineAlertOpen(false)}
+        >
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+            className="flex w-[545px] max-w-full flex-col items-center rounded-[36px] bg-white px-[40px] py-[36px] shadow-[0px_2px_40px_0px_rgba(204,204,204,0.5)]"
+          >
+            <h2 className="text-center text-[28px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
+              ‘디자인 미팅’ 회의에 참석하지 않을게요
+            </h2>
+            <p className="mt-[9px] text-center text-[16px] font-normal leading-[1.6] tracking-[-0.5px] text-gray-700">
+              주최자에게 미참석 알림이 전송돼요.
+            </p>
+            <div className="mt-[24px] flex items-center gap-[10px]">
+              <button
+                type="button"
+                onClick={() => setDeclineAlertOpen(false)}
+                className="flex h-[48px] w-[136px] items-center justify-center rounded-[18px] bg-[#f3f4f5] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-800 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  markRead("opt-design-meeting");
+                  setOptionalAnswer("decline");
+                  setDeclineAlertOpen(false);
+                }}
+                className="flex h-[48px] w-[136px] items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95"
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </aside>
   );

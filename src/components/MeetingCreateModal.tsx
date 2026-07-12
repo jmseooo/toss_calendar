@@ -200,7 +200,7 @@ export default function MeetingCreateModal({
               </h2>
 
               <p className="absolute left-1/2 top-[78px] -translate-x-1/2 whitespace-nowrap text-[16px] font-normal leading-[1.6] tracking-[-0.5px] text-gray-700">
-                시작일만 선택해도, 종료일은 같은 날짜로 자동 설정돼요.
+                동료들에게 가능한 시간을 물어보세요.
               </p>
 
               {/* 달력 아이콘 + 시작일 - 종료일 */}

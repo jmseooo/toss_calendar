@@ -493,7 +493,11 @@ export default function RequiredAttendeesView({
               });
               setSent(true);
             }}
-            className="flex h-[57px] w-[232px] items-center justify-center gap-[8px] rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95 disabled:pointer-events-none disabled:bg-gray-300 disabled:text-gray-600"
+            className={`flex h-[57px] w-[232px] items-center justify-center gap-[8px] rounded-[18px] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] transition duration-150 ease-out ${
+              participants.length === 0
+                ? "cursor-not-allowed bg-gray-300 text-gray-600"
+                : "bg-carrot-600 text-white hover:scale-[1.04] hover:brightness-95 active:scale-[0.98]"
+            }`}
           >
             선택 날짜 초대 보내기
             <SendIcon size={20} />

@@ -120,12 +120,22 @@ function WeekHeaderCell({ cell }: { cell: DayCell }) {
 
 /** 하루치 시간 일정 카드 스택 — 컬럼 한 칸 */
 function WeekTimedColumn({ cell }: { cell: DayCell }) {
-  const { role, confirmedEvents, lastConfirmedId } = useInvite();
+  const { role, confirmedEvents, lastConfirmedId, optionalMeeting } =
+    useInvite();
   // 시드 일정 + 이 날 확정된 회의를 합친다. 확정 회의는 chip: "line" 이라 시간 컬럼에 온다.
   const confirmed = confirmedEvents.filter((e) => e.date === cell.date);
-  const timed = [...eventsByDate(cell.date, role), ...confirmed].filter(
-    (e) => e.chip !== "filled",
-  );
+  // 선택 참여자 초대를 탭했을 때 이 날에 임시로 생기는 가(假) 일정 (참여자 뷰 전용).
+  const tentative =
+    role === "invitee" &&
+    optionalMeeting &&
+    optionalMeeting.date === cell.date
+      ? [optionalMeeting]
+      : [];
+  const timed = [
+    ...eventsByDate(cell.date, role),
+    ...confirmed,
+    ...tentative,
+  ].filter((e) => e.chip !== "filled");
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-[8px] px-[6px]">
@@ -150,6 +160,38 @@ function WeekEventCard({
   justAdded?: boolean;
 }) {
   const { openDay } = useDayView();
+
+  // 임시(가) 일정 — 주황 점선 카드 (Figma 243:9275). 탭하면 펼침 애니메이션과 함께 생긴다.
+  if (event.tentative) {
+    return (
+      <button
+        type="button"
+        onClick={() => openDay(event.date)}
+        className={`flex w-full min-w-0 flex-col gap-[6px] rounded-[6px] border border-dashed border-carrot-600 bg-gray-00 px-[10px] py-[8px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+          justAdded ? "animate-block-unfold" : ""
+        }`}
+      >
+        <div className="flex min-w-0 flex-col gap-[2px]">
+          {event.startTime && (
+            <p className="truncate text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] text-[#471601]">
+              {event.startTime}~{event.endTime}
+            </p>
+          )}
+          <p className="truncate text-[15px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600">
+            {event.title}
+          </p>
+        </div>
+        {event.location && (
+          <div className="flex min-w-0 items-center gap-px text-gray-800">
+            <LocationIcon size={13} className="shrink-0" />
+            <span className="truncate text-[13px] font-semibold leading-[1.3] tracking-[-0.5px]">
+              {event.location}
+            </span>
+          </div>
+        )}
+      </button>
+    );
+  }
 
   return (
     <button

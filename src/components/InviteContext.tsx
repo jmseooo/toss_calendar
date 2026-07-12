@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { CalendarEvent } from "@/data/events";
+import { OPTIONAL_MEETING_EVENT, type CalendarEvent } from "@/data/events";
 
 /** 전송된 회의 초대 정보 — 알림 표시에 그대로 쓰이도록 표시용 문자열로 담는다. */
 export interface InviteInfo {
@@ -79,6 +79,10 @@ interface InviteContextValue {
   confirmedEvents: CalendarEvent[];
   /** 방금 확정한 이벤트 id — 캘린더에서 펼침 애니메이션 대상 */
   lastConfirmedId: string | null;
+  /** 선택 참여자 초대 알림을 탭했을 때 임시로 생기는 가(假) 일정 (없으면 미표시) */
+  optionalMeeting: CalendarEvent | null;
+  /** 그 임시 일정을 주간 뷰에 드러낸다 (펼침 애니메이션과 함께) */
+  revealOptionalMeeting: () => void;
   role: ViewRole;
   toggleRole: () => void;
 }
@@ -89,7 +93,14 @@ export function InviteProvider({ children }: { children: ReactNode }) {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [confirmedEvents, setConfirmedEvents] = useState<CalendarEvent[]>([]);
   const [lastConfirmedId, setLastConfirmedId] = useState<string | null>(null);
+  const [optionalRevealed, setOptionalRevealed] = useState(false);
   const [role, setRole] = useState<ViewRole>("organizer");
+
+  const revealOptionalMeeting = useCallback(() => {
+    setOptionalRevealed(true);
+    // 방금 생긴 임시 일정으로 지정 → 주간 뷰에서 펼침 애니메이션이 돈다.
+    setLastConfirmedId(OPTIONAL_MEETING_EVENT.id);
+  }, []);
 
   const sendInvite = useCallback((info: InviteInfo) => {
     setMeetings((prev) => [
@@ -151,6 +162,8 @@ export function InviteProvider({ children }: { children: ReactNode }) {
       markOptionalSent,
       confirmedEvents,
       lastConfirmedId,
+      optionalMeeting: optionalRevealed ? OPTIONAL_MEETING_EVENT : null,
+      revealOptionalMeeting,
       role,
       toggleRole,
     }),
@@ -162,6 +175,8 @@ export function InviteProvider({ children }: { children: ReactNode }) {
       markOptionalSent,
       confirmedEvents,
       lastConfirmedId,
+      optionalRevealed,
+      revealOptionalMeeting,
       role,
       toggleRole,
     ],
