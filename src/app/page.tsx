@@ -22,18 +22,19 @@ export default function Home() {
             <div className="flex h-screen w-full overflow-hidden">
               <Sidebar />
 
-              <div className="flex min-w-0 flex-1 flex-row">
-                {/* 가운데: 툴바 + 캘린더(월간/주간 전환) — 가로폭에 따라 함께 축소 */}
-                <main className="flex min-h-0 min-w-0 flex-1 flex-col gap-[19px] overflow-y-auto px-3 py-6 sm:px-6 xl:px-[37px] xl:py-[24px]">
+              {/* lg 이상: 캘린더 | 일별 캘린더 나란히(각자 스크롤).
+                  lg 미만: 세로로 쌓여 일별 캘린더가 캘린더 아래로 내려가고 전체가 스크롤된다. */}
+              <div className="flex min-w-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
+                {/* 가운데: 툴바 + 캘린더(월간/주간 전환) — 가로폭에 따라 크기가 함께 축소 */}
+                <main className="flex min-w-0 flex-col gap-[19px] px-3 py-6 sm:px-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto xl:px-[37px] xl:py-[24px]">
                   <CalendarToolbar />
                   <CalendarView />
                 </main>
 
-                {/* 우측: 일별 캘린더(아젠다) — 항상 캘린더 옆에 표시.
-                    scrollbar-gutter:stable — 고른 날짜의 일정 개수에 따라 세로 스크롤바가
-                    생겼다 사라지면 이 컬럼 폭이 스크롤바만큼 바뀌고, 그만큼 가운데 캘린더가
-                    좁아졌다 넓어진다. 스크롤바 자리를 늘 비워둬 가로폭을 일정하게 유지한다. */}
-                <div className="min-h-0 shrink-0 overflow-y-auto [scrollbar-gutter:stable] px-3 py-6 sm:px-4 xl:py-[24px] xl:pl-0 xl:pr-[42px]">
+                {/* 우측(넓을 때) / 아래(좁을 때): 일별 캘린더(아젠다).
+                    scrollbar-gutter:stable — 일정 개수에 따라 세로 스크롤바가 생겼다 사라져도
+                    이 컬럼 폭이 흔들리지 않게 스크롤바 자리를 늘 비워둔다. */}
+                <div className="w-full shrink-0 px-3 py-6 sm:px-4 lg:min-h-0 lg:w-auto lg:overflow-y-auto lg:[scrollbar-gutter:stable] xl:py-[24px] xl:pl-0 xl:pr-[42px]">
                   <AgendaPanel />
                 </div>
               </div>

@@ -38,7 +38,8 @@ export default function MonthGrid() {
       </div>
 
       {/* 6주 그리드 — Figma: 6행 × 각 128px 고정. minmax로 최소 128px 보장해 아래가 잘리지 않게 */}
-      <div className="grid grid-cols-7 grid-rows-[repeat(6,minmax(128px,1fr))]">
+      {/* 칸 높이도 화면에 따라 함께 줄어든다 — 좁을수록 캘린더 전체가 작아진다 */}
+      <div className="grid grid-cols-7 grid-rows-[repeat(6,minmax(84px,1fr))] sm:grid-rows-[repeat(6,minmax(104px,1fr))] lg:grid-rows-[repeat(6,minmax(116px,1fr))] xl:grid-rows-[repeat(6,minmax(128px,1fr))]">
         {cells.map((cell) => (
           <DayCellView key={cell.date} cell={cell} />
         ))}

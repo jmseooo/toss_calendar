@@ -68,7 +68,7 @@ export default function AgendaPanel() {
   );
 
   return (
-    <div className="flex w-[200px] flex-col sm:w-[260px] md:w-[300px] xl:w-[321px]">
+    <div className="flex w-full flex-col lg:w-[300px] xl:w-[321px]">
       {/* 상단 버튼 줄 — 높이 57px은 툴바(min-h-[57px])와 같다. 덕분에 "초대자 화면"
           버튼이 툴바의 "일정 생성하기" 버튼과 세로 중심으로 나란히 놓인다.
           아래 mt-[19px]는 main 의 gap-[19px]와 같은 값. (원래 pt-[76px] = 57 + 19) */}
