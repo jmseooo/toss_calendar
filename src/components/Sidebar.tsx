@@ -4,8 +4,16 @@ import { useState } from "react";
 import Image from "next/image";
 import { BellIcon, SearchIcon, ChatIcon } from "./icons";
 import { useInvite } from "./InviteContext";
+import { SELF } from "@/data/people";
+import { WEEKDAYS } from "@/lib/calendar";
 import MeetingConfirmView from "./MeetingConfirmView";
 import MeetingReplyView from "./MeetingReplyView";
+
+/** "2026-07-02" → "7/2 (목)" */
+function formatShortDate(iso: string): string {
+  const d = new Date(iso + "T00:00:00");
+  return `${d.getMonth() + 1}/${d.getDate()} (${WEEKDAYS[d.getDay()]})`;
+}
 
 /**
  * 좌측 사이드바 — 가로폭에 따라 비례 축소.
@@ -14,7 +22,8 @@ import MeetingReplyView from "./MeetingReplyView";
  * 알림은 초대를 보낸 뒤에만 생긴다.
  */
 export default function Sidebar() {
-  const { invite, clearInvite, role, replied, markReplied } = useInvite();
+  const { invite, clearInvite, role, reply, submitReply } = useInvite();
+  const replied = reply !== null;
   const [notifOpen, setNotifOpen] = useState(false);
   // 알림을 누르면 "회의 일정 확정하기" 전체 화면이 열린다.
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -34,9 +43,16 @@ export default function Sidebar() {
   // 알림 내용은 주최자가 초대를 보낼 때 넘긴 실제 데이터(주제·참석자·날짜)로 채운다.
   // 참여자는 "초대받았다", 주최자는 "답변이 왔다"는 같은 초대 건을 서로 다르게 본다.
   const isInvitee = role === "invitee";
-  // 참여자는 초대 알림 1건. 주최자는 답변 도착 1건 + 참여자가 답변한 뒤 일정 확정 1건.
-  const notifCount = invite ? (isInvitee ? 1 : replied ? 2 : 1) : 0;
+  // 참여자는 초대받는 즉시 알림 1건. 주최자는 참여자가 실제로 답변을 보낸 뒤에만
+  // (답변 도착 + 일정 확정) 2건이 뜬다. 초대만 보낸 상태에선 주최자에게 알림이 없다.
+  const hasNotif = invite !== null && (isInvitee || replied);
+  const notifCount = hasNotif ? (isInvitee ? 1 : 2) : 0;
   const replyCount = invite?.participants.length ?? 0;
+  // "선택했습니다" 알림에 쓸 이름 — 주최자가 고른 필수 참여자 중 나(SELF)를 뺀 첫 번째.
+  const replierName =
+    invite?.participants.find((n) => n !== SELF) ??
+    invite?.participants[0] ??
+    "참여자";
 
   return (
     <aside
@@ -75,8 +91,8 @@ export default function Sidebar() {
             >
               <BellIcon />
             </button>
-            {/* 새 알림 점 — 초대를 보낸 뒤에만 표시 */}
-            {invite && (
+            {/* 새 알림 점 — 볼 알림이 있을 때만 표시 */}
+            {hasNotif && (
               <span className="pointer-events-none absolute -right-[2px] -top-[1px] size-[9px] rounded-full bg-[#ff6a60] ring-2 ring-gray-00" />
             )}
           </div>
@@ -105,31 +121,50 @@ export default function Sidebar() {
             읽지 않은 알림 ({notifCount})
           </p>
 
-          {invite ? (
+          {hasNotif ? (
             <div className="mt-[14px] flex flex-col gap-[2px]">
               {isInvitee ? (
-                /* 초대자(참여자) 화면 — 초대를 받았다는 알림. 누르면 답변 화면 */
-                <button
-                  type="button"
-                  onClick={() => setReplyOpen(true)}
-                  className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex flex-col gap-[10px] rounded-[22px] px-[14px] py-[18px] text-left hover:bg-gray-100/60"
-                >
-                  <div className="flex flex-col gap-[8px]">
+                replied ? (
+                  /* 참여자가 일정을 선택한 뒤 — 선택 완료 알림 */
+                  <div className="flex flex-col gap-[10px] rounded-[22px] px-[14px] py-[18px]">
                     <div className="flex items-start gap-[6px]">
                       <span className="size-[24px] shrink-0 rounded-full bg-gray-600" />
                       <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
-                        참여자
+                        {replierName}
                       </span>
-                      <span className="size-[12px] shrink-0 rounded-full bg-[#ff6a60]" />
+                      <span className="mt-[2px] size-[8px] shrink-0 rounded-full bg-[#ff6a60]" />
                     </div>
                     <p className="pl-[2px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
-                      ‘{invite.topic}’ 회의 일정에 초대했어요.
+                      ‘{invite.topic}’ 회의 일정을 선택했습니다.
+                    </p>
+                    <p className="pl-[4px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-600">
+                      {formatShortDate(invite.startDate)} {invite.recommendedTime}
                     </p>
                   </div>
-                  <p className="pl-[4px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-700">
-                    가능 시간을 선택해 답변해주세요.
-                  </p>
-                </button>
+                ) : (
+                  /* 초대자(참여자) 화면 — 초대를 받았다는 알림. 누르면 답변 화면 */
+                  <button
+                    type="button"
+                    onClick={() => setReplyOpen(true)}
+                    className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex flex-col gap-[10px] rounded-[22px] px-[14px] py-[18px] text-left hover:bg-gray-100/60"
+                  >
+                    <div className="flex flex-col gap-[8px]">
+                      <div className="flex items-start gap-[6px]">
+                        <span className="size-[24px] shrink-0 rounded-full bg-gray-600" />
+                        <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
+                          참여자
+                        </span>
+                        <span className="mt-[2px] size-[8px] shrink-0 rounded-full bg-[#ff6a60]" />
+                      </div>
+                      <p className="pl-[2px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
+                        ‘{invite.topic}’ 회의 일정에 초대했어요.
+                      </p>
+                    </div>
+                    <p className="pl-[4px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-700">
+                      가능 시간을 선택해 답변해주세요.
+                    </p>
+                  </button>
+                )
               ) : (
                 /* 주최자 화면 — 답변 도착 알림 + 일정 확정 알림, 두 건. */
                 <>
@@ -152,20 +187,19 @@ export default function Sidebar() {
                     </p>
                   </button>
 
-                  {/* 일정 확정 알림 — 참여자가 답변을 보낸 뒤에만 뜬다 */}
-                  {replied && (
-                  <div className="flex flex-col gap-[8px] rounded-[22px] px-[14px] py-[18px]">
+                  {/* 일정 확정 알림 — 누르면 "회의 일정 확정하기" 화면으로 이동 */}
+                  <button
+                    type="button"
+                    onClick={() => setConfirmOpen(true)}
+                    className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex flex-col gap-[8px] rounded-[22px] px-[14px] py-[18px] text-left hover:bg-gray-100/60"
+                  >
                     <div className="flex items-start gap-[8px]">
                       <p className="flex-1 text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
-                        ‘{invite.topic}’ 회의 일정이 확정되었어요.
+                        ‘{invite.topic}’ 회의 일정을 확정할 수 있어요.
                       </p>
-                      <span className="mt-[4px] size-[12px] shrink-0 rounded-full bg-[#ff6a60]" />
+                      <span className="mt-[2px] size-[8px] shrink-0 rounded-full bg-[#ff6a60]" />
                     </div>
-                    <p className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-600">
-                      {invite.dateLabel} {invite.recommendedTime}
-                    </p>
-                  </div>
-                  )}
+                  </button>
                 </>
               )}
             </div>
@@ -183,6 +217,8 @@ export default function Sidebar() {
           key={confirmOpen ? "confirm-open" : "confirm-closed"}
           open={confirmOpen}
           invite={invite}
+          // 초대자가 좋아요한 시간대를 우선, 없으면 첫 번째 선택한 시간대를 기본 선택으로
+          initialHour={reply?.liked[0] ?? reply?.hours[0]}
           onClose={() => setConfirmOpen(false)}
           onConfirm={() => {
             // 확정하면 알림을 소비하고 화면을 닫는다.
@@ -200,9 +236,9 @@ export default function Sidebar() {
           open={replyOpen}
           invite={invite}
           onClose={() => setReplyOpen(false)}
-          onSubmit={() => {
-            // 답변을 보내면 주최자 쪽에 "일정 확정" 알림이 생긴다.
-            markReplied();
+          onSubmit={(hours, liked) => {
+            // 참여자가 고른 시간대를 저장하면 주최자 쪽에 "일정 확정" 알림이 생긴다.
+            submitReply(hours, liked);
             setReplyOpen(false);
             setNotifOpen(false);
           }}

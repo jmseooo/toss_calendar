@@ -30,14 +30,20 @@ export interface InviteInfo {
  */
 export type ViewRole = "organizer" | "invitee";
 
+/** 참여자가 답변 화면에서 고른 결과 — 선택한 시간대와 "좋아요"한 시간대(시각 hour) */
+export interface ReplySelection {
+  hours: number[];
+  liked: number[];
+}
+
 interface InviteContextValue {
   /** 아직 초대를 안 보냈으면 null */
   invite: InviteInfo | null;
   sendInvite: (info: InviteInfo) => void;
   clearInvite: () => void;
-  /** 참여자가 답변을 보냈는지 — 주최자의 "일정 확정" 알림이 이때부터 뜬다 */
-  replied: boolean;
-  markReplied: () => void;
+  /** 참여자가 보낸 답변 — 아직 안 보냈으면 null. 주최자의 "일정 확정" 알림은 이때부터 뜬다 */
+  reply: ReplySelection | null;
+  submitReply: (hours: number[], liked: number[]) => void;
   role: ViewRole;
   toggleRole: () => void;
 }
@@ -46,27 +52,30 @@ const InviteContext = createContext<InviteContextValue | null>(null);
 
 export function InviteProvider({ children }: { children: ReactNode }) {
   const [invite, setInvite] = useState<InviteInfo | null>(null);
-  const [replied, setReplied] = useState(false);
+  const [reply, setReply] = useState<ReplySelection | null>(null);
   const [role, setRole] = useState<ViewRole>("organizer");
 
-  // 새 초대를 보내면 답변 상태를 초기화한다.
+  // 새 초대를 보내면 답변을 초기화한다.
   const sendInvite = useCallback((info: InviteInfo) => {
     setInvite(info);
-    setReplied(false);
+    setReply(null);
   }, []);
   const clearInvite = useCallback(() => {
     setInvite(null);
-    setReplied(false);
+    setReply(null);
   }, []);
-  const markReplied = useCallback(() => setReplied(true), []);
+  const submitReply = useCallback(
+    (hours: number[], liked: number[]) => setReply({ hours, liked }),
+    [],
+  );
   const toggleRole = useCallback(
     () => setRole((r) => (r === "organizer" ? "invitee" : "organizer")),
     [],
   );
 
   const value = useMemo(
-    () => ({ invite, sendInvite, clearInvite, replied, markReplied, role, toggleRole }),
-    [invite, sendInvite, clearInvite, replied, markReplied, role, toggleRole],
+    () => ({ invite, sendInvite, clearInvite, reply, submitReply, role, toggleRole }),
+    [invite, sendInvite, clearInvite, reply, submitReply, role, toggleRole],
   );
 
   return (

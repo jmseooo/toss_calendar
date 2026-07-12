@@ -10,8 +10,8 @@ interface MeetingReplyViewProps {
   invite: InviteInfo;
   /** "뒤로" / Esc — 닫기 */
   onClose: () => void;
-  /** "이 일정으로 전달하기" — 고른 시간대들로 답변 */
-  onSubmit: (hours: number[]) => void;
+  /** "이 일정으로 전달하기" — 고른 시간대(hours)와 좋아요한 시간대(liked)로 답변 */
+  onSubmit: (hours: number[], liked: number[]) => void;
 }
 
 /** 처음에 보여줄 후보 개수. 나머지는 "다른 후보 일정 더보기"로 편다. */
@@ -185,7 +185,7 @@ export default function MeetingReplyView({
                       aria-label={`${slot.time} 좋아요`}
                       className={`flex size-[44px] shrink-0 items-center justify-center transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] ${
                         isLiked
-                          ? "text-carrot-600"
+                          ? "text-[#ffcc00]"
                           : allFree
                             ? "text-white hover:text-[#d8dcff]"
                             : "text-gray-300 hover:text-gray-400"
@@ -225,7 +225,12 @@ export default function MeetingReplyView({
           <button
             type="button"
             disabled={checked.size === 0}
-            onClick={() => onSubmit([...checked].sort((a, b) => a - b))}
+            onClick={() =>
+              onSubmit(
+                [...checked].sort((a, b) => a - b),
+                [...liked].sort((a, b) => a - b),
+              )
+            }
             className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:brightness-100"
           >
             이 일정으로 전달하기

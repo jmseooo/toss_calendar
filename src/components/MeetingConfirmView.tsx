@@ -8,6 +8,8 @@ import type { InviteInfo } from "./InviteContext";
 interface MeetingConfirmViewProps {
   open: boolean;
   invite: InviteInfo;
+  /** 초대자가 답변에서 고른(또는 좋아요한) 시간대 — 처음 선택 상태의 기본값 */
+  initialHour?: number;
   /** "뒤로" / Esc — 닫기 */
   onClose: () => void;
   /** "일정 확정하기" — 고른 시간대로 확정 */
@@ -28,6 +30,7 @@ const MAX_AVATARS = 4;
 export default function MeetingConfirmView({
   open,
   invite,
+  initialHour,
   onClose,
   onConfirm,
 }: MeetingConfirmViewProps) {
@@ -44,9 +47,12 @@ export default function MeetingConfirmView({
     return [...available, ...blocked];
   }, [participants, startDate]);
 
-  // 1순위 = 모두 가능한 첫 시간대. 없으면 가장 적게 막힌 첫 시간대.
-  const recommendedHour = slots[0]?.hour ?? null;
-  const [selected, setSelected] = useState<number | null>(recommendedHour);
+  // 기본 선택 = 초대자가 고른 시간대(있고 목록에 남아 있으면). 없으면 1순위(첫 시간대).
+  const defaultHour =
+    initialHour != null && slots.some((s) => s.hour === initialHour)
+      ? initialHour
+      : (slots[0]?.hour ?? null);
+  const [selected, setSelected] = useState<number | null>(defaultHour);
 
   useEffect(() => {
     if (!open) return;
