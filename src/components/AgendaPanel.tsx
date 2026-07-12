@@ -11,6 +11,8 @@ import {
 } from "@/data/events";
 import { addDays, formatAgendaHeading } from "@/lib/calendar";
 import { useToday } from "./TodayContext";
+import Avatar from "./Avatar";
+import { avatarByIndex } from "@/data/avatars";
 
 /** 아젠다에 보여줄 날짜 수 (선택한 날짜 1 + 다음 2일) */
 const AGENDA_DAY_COUNT = 3;
@@ -247,9 +249,10 @@ function AgendaCard({ event, delay }: { event: CalendarEvent; delay: number }) {
           <div className="flex items-center gap-[3px]">
             <div className="flex">
               {[0, 1, 2].map((i) => (
-                <span
+                <Avatar
                   key={i}
-                  className="size-[28px] rounded-full border-2 border-gray-00 bg-gray-600"
+                  src={avatarByIndex(event.title.length * 3 + i)}
+                  className="size-[28px] border-2 border-gray-00"
                   style={{ marginLeft: i === 0 ? 0 : -14 }} // 지름의 절반만큼 겹친다
                 />
               ))}

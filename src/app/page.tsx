@@ -1,12 +1,13 @@
 import Sidebar from "@/components/Sidebar";
 import CalendarToolbar from "@/components/CalendarToolbar";
 import CalendarView from "@/components/CalendarView";
-import AgendaPanel from "@/components/AgendaPanel";
+import AgendaColumn from "@/components/AgendaColumn";
 import { DayViewProvider } from "@/components/DayViewContext";
 import { MonthViewProvider } from "@/components/MonthViewContext";
 import { WeekViewProvider } from "@/components/WeekViewContext";
 import { ViewModeProvider } from "@/components/ViewModeContext";
 import { InviteProvider } from "@/components/InviteContext";
+import { NotifPanelProvider } from "@/components/NotifPanelContext";
 import { TodayProvider } from "@/components/TodayContext";
 
 export default function Home() {
@@ -19,6 +20,7 @@ export default function Home() {
         <WeekViewProvider>
           <DayViewProvider>
             <InviteProvider>
+            <NotifPanelProvider>
             <div className="flex h-screen w-full overflow-hidden">
               <Sidebar />
 
@@ -32,13 +34,11 @@ export default function Home() {
                 </main>
 
                 {/* 우측(넓을 때) / 아래(좁을 때): 일별 캘린더(아젠다).
-                    scrollbar-gutter:stable — 일정 개수에 따라 세로 스크롤바가 생겼다 사라져도
-                    이 컬럼 폭이 흔들리지 않게 스크롤바 자리를 늘 비워둔다. */}
-                <div className="w-full shrink-0 px-3 py-6 sm:px-4 lg:min-h-0 lg:w-auto lg:overflow-y-auto lg:[scrollbar-gutter:stable] xl:py-[24px] xl:pl-0 xl:pr-[42px]">
-                  <AgendaPanel />
-                </div>
+                    알림 패널이 열리면 접히고 닫히면 다시 나타난다. */}
+                <AgendaColumn />
               </div>
             </div>
+            </NotifPanelProvider>
             </InviteProvider>
           </DayViewProvider>
         </WeekViewProvider>

@@ -7,6 +7,7 @@ import { buildDaySlots } from "@/data/schedules";
 import { CheckIcon, CloseIcon, SearchIcon, SendIcon, TrashIcon } from "./icons";
 import { useInvite } from "./InviteContext";
 import CompletionGlow from "./CompletionGlow";
+import Avatar from "./Avatar";
 
 interface RequiredAttendeesViewProps {
   open: boolean;
@@ -189,7 +190,7 @@ export default function RequiredAttendeesView({
                 key={n}
                 className="flex items-center gap-[11px] rounded-[18px] bg-white/[0.66] p-[12px]"
               >
-                <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
+                <Avatar name={n} className="size-[30px]" />
                 <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
                   {n}
                 </span>
@@ -273,7 +274,7 @@ export default function RequiredAttendeesView({
                       className="group flex items-center justify-between rounded-[12px] px-[18px] py-[2px] transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-[11px]">
-                        <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
+                        <Avatar name={name} className="size-[30px]" />
                         <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-900">
                           {name}
                         </span>
@@ -304,7 +305,7 @@ export default function RequiredAttendeesView({
                   className="group flex items-center justify-between rounded-[12px] px-[18px] py-[3px] transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:bg-[#f7f8f9]"
                 >
                   <div className="flex items-center gap-[11px]">
-                    <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
+                    <Avatar name={name} className="size-[30px]" />
                     <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-900">
                       {name}
                     </span>

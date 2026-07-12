@@ -168,18 +168,19 @@ function WeekEventCard({
       <button
         type="button"
         onClick={() => openDay(event.date)}
-        className={`relative flex w-full min-w-0 flex-col gap-[6px] rounded-[6px] bg-gray-00 px-[10px] py-[8px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+        className={`relative flex min-h-[200px] w-full min-w-0 flex-col gap-[6px] rounded-[6px] bg-gray-00 px-[10px] py-[12px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98] ${
           justAdded ? "animate-block-unfold" : ""
         }`}
       >
-        {/* 테두리 — SVG 획으로 그린다 (pathLength=1 정규화라 카드 크기와 무관) */}
+        {/* 점선 테두리 — 배경색 획으로 덮었다가 둘레를 한 바퀴 걷어내며 점선을 드러낸다.
+            보이는 요소라 CSS 애니메이션이 끝까지(테두리 완성) 확실히 재생된다.
+            (pathLength=1 정규화라 카드 크기와 무관) */}
         <svg
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
           aria-hidden
           className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
         >
-          {/* 최종 점선 테두리 — 획이 다 그려질 즈음 나타난다 */}
           <rect
             x="0.5"
             y="0.5"
@@ -191,9 +192,8 @@ function WeekEventCard({
             strokeWidth="1"
             vectorEffect="non-scaling-stroke"
             strokeDasharray="4 4"
-            className={justAdded ? "animate-dash-appear" : ""}
           />
-          {/* 그려지는 획 — 한 바퀴 돌고 사라진다 (처음 생길 때만) */}
+          {/* 카드 배경색(#fff) 획 — 처음 생길 때 점선을 덮었다가 걷힌다 */}
           {justAdded && (
             <rect
               x="0.5"
@@ -202,30 +202,29 @@ function WeekEventCard({
               height="99"
               rx="6"
               fill="none"
-              stroke="#ff6600"
-              strokeWidth="1.2"
-              strokeLinecap="round"
+              stroke="#ffffff"
+              strokeWidth="4"
               vectorEffect="non-scaling-stroke"
               pathLength={1}
-              strokeDasharray="1"
-              className="animate-dash-draw"
+              strokeDasharray="1 1"
+              className="animate-dash-uncover"
             />
           )}
         </svg>
         <div className="flex min-w-0 flex-col gap-[2px]">
           {event.startTime && (
-            <p className="text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] text-[#471601]">
+            <p className="text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] text-[#471601] [overflow-wrap:anywhere]">
               {event.startTime}~{event.endTime}
             </p>
           )}
-          <p className="text-[15px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600">
+          <p className="text-[15px] font-semibold leading-[1.3] tracking-[-0.5px] text-carrot-600 [overflow-wrap:anywhere]">
             {event.title}
           </p>
         </div>
         {event.location && (
           <div className="flex min-w-0 items-start gap-px text-gray-800">
             <LocationIcon size={13} className="mt-[1px] shrink-0" />
-            <span className="min-w-0 flex-1 text-[13px] font-semibold leading-[1.3] tracking-[-0.5px]">
+            <span className="min-w-0 flex-1 text-[13px] font-semibold leading-[1.3] tracking-[-0.5px] [overflow-wrap:anywhere]">
               {event.location}
             </span>
           </div>

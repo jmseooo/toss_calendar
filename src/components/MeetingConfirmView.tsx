@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { buildDaySlots } from "@/data/schedules";
 import { CheckIcon } from "./icons";
 import CompletionGlow from "./CompletionGlow";
+import Avatar from "./Avatar";
 import type { InviteInfo } from "./InviteContext";
 
 interface MeetingConfirmViewProps {
@@ -104,7 +105,7 @@ export default function MeetingConfirmView({
                 key={`${n}-${i}`}
                 className="flex items-center gap-[11px] rounded-[16px] border border-gray-300 bg-white px-[16px] py-[10px]"
               >
-                <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
+                <Avatar name={n} className="size-[30px]" />
                 <span className="whitespace-nowrap text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
                   {n}
                 </span>
@@ -177,7 +178,6 @@ export default function MeetingConfirmView({
             {slots.map((slot, index) => {
               const isOn = selected === slot.hour;
               const allFree = slot.blockedBy.length === 0;
-              const attending = participants.length - slot.blockedBy.length;
 
               return (
                 <div
@@ -235,17 +235,21 @@ export default function MeetingConfirmView({
                       </span>
                     </div>
 
-                    {/* 그 시간에 올 수 있는 사람 수만큼 아바타를 겹쳐 그린다 */}
+                    {/* 그 시간에 올 수 있는 참석자들의 프로필을 겹쳐 그린다 */}
                     <div className="flex shrink-0">
-                      {Array.from({
-                        length: Math.min(attending, MAX_AVATARS),
-                      }).map((_, i) => (
-                        <span
-                          key={i}
-                          style={{ marginLeft: i === 0 ? 0 : -15 }}
-                          className="size-[30px] shrink-0 rounded-full bg-gray-600"
-                        />
-                      ))}
+                      {participants
+                        .filter(
+                          (p) => !slot.blockedBy.some((b) => b.name === p),
+                        )
+                        .slice(0, MAX_AVATARS)
+                        .map((p, i) => (
+                          <Avatar
+                            key={p}
+                            name={p}
+                            className="size-[30px] ring-2 ring-white"
+                            style={{ marginLeft: i === 0 ? 0 : -15 }}
+                          />
+                        ))}
                     </div>
                   </button>
                 </div>

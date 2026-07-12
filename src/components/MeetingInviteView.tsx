@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { PEOPLE } from "@/data/people";
 import { CheckIcon, CloseIcon, SearchIcon, SendIcon } from "./icons";
 import CompletionGlow from "./CompletionGlow";
+import Avatar from "./Avatar";
 import type { ConfirmedMeeting } from "./InviteContext";
 
 interface MeetingInviteViewProps {
@@ -84,7 +85,7 @@ export default function MeetingInviteView({
                 key={`${n}-${i}`}
                 className="flex items-center gap-[11px] rounded-[16px] border border-gray-300 bg-white px-[16px] py-[10px]"
               >
-                <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
+                <Avatar name={n} className="size-[30px]" />
                 <span className="whitespace-nowrap text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-black">
                   {n}
                 </span>
@@ -173,7 +174,7 @@ export default function MeetingInviteView({
                       className="group flex items-center justify-between rounded-[12px] px-[18px] py-[3px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98] hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-[11px]">
-                        <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
+                        <Avatar name={name} className="size-[30px]" />
                         <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-900">
                           {name}
                         </span>
@@ -203,7 +204,7 @@ export default function MeetingInviteView({
                     className="group flex items-center justify-between rounded-[12px] px-[18px] py-[3px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98] hover:bg-[#f7f8f9] disabled:pointer-events-none"
                   >
                     <div className="flex items-center gap-[11px]">
-                      <span className="size-[30px] shrink-0 rounded-full bg-gray-600" />
+                      <Avatar name={name} className="size-[30px]" />
                       <span className="text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-900">
                         {name}
                       </span>

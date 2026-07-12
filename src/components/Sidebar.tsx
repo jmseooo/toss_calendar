@@ -6,12 +6,15 @@ import { BellIcon, SearchIcon, ChatIcon } from "./icons";
 import { useInvite } from "./InviteContext";
 import { useViewMode } from "./ViewModeContext";
 import { useWeekView } from "./WeekViewContext";
+import { useNotifPanel } from "./NotifPanelContext";
 import { SELF } from "@/data/people";
 import { OPTIONAL_MEETING_DATE } from "@/data/events";
 import { WEEKDAYS } from "@/lib/calendar";
 import MeetingConfirmView from "./MeetingConfirmView";
 import MeetingReplyView from "./MeetingReplyView";
 import MeetingInviteView from "./MeetingInviteView";
+import Avatar from "./Avatar";
+import { avatarByIndex } from "@/data/avatars";
 
 /** "2026-07-02" → "7/2 (목)" */
 function formatShortDate(iso: string): string {
@@ -43,8 +46,8 @@ export default function Sidebar() {
   } = useInvite();
   const { setMode } = useViewMode();
   const { goToDate } = useWeekView();
-
-  const [notifOpen, setNotifOpen] = useState(false);
+  // 알림 패널 열림 상태는 공유한다 — 열리면 우측 일별(아젠다) 캘린더가 접힌다.
+  const { open: notifOpen, setOpen: setNotifOpen } = useNotifPanel();
   const [replyMeetingId, setReplyMeetingId] = useState<string | null>(null);
   const [confirmMeetingId, setConfirmMeetingId] = useState<string | null>(null);
   const [inviteMeetingId, setInviteMeetingId] = useState<string | null>(null);
@@ -117,7 +120,7 @@ export default function Sidebar() {
             >
               <div className="flex flex-col gap-[8px]">
                 <div className="flex items-start gap-[6px]">
-                  <span className="size-[24px] shrink-0 rounded-full bg-gray-600" />
+                  <Avatar src={avatarByIndex(0)} className="size-[24px]" />
                   <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
                     참여자
                   </span>
@@ -150,7 +153,7 @@ export default function Sidebar() {
               className={CARD}
             >
               <div className="flex items-start gap-[6px]">
-                <span className="size-[24px] shrink-0 rounded-full bg-gray-600" />
+                <Avatar name={replier} className="size-[24px]" />
                 <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
                   {replier}
                 </span>
@@ -258,7 +261,7 @@ export default function Sidebar() {
         >
           <div className="flex flex-col gap-[8px]">
             <div className="flex items-start gap-[6px]">
-              <span className="size-[24px] shrink-0 rounded-full bg-gray-600" />
+              <Avatar src={avatarByIndex(1)} className="size-[24px]" />
               <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
                 참여자
               </span>
