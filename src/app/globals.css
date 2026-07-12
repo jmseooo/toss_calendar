@@ -112,11 +112,40 @@
   animation: agenda-fade 0.24s ease-out both;
 }
 
+/* 텍스트필드 포커스 테두리 — 짧은 호가 둘레를 한 바퀴 돈 뒤 사라지고, 3초 쉬었다 반복.
+   CSS엔 반복 간 딜레이가 없어 전체 타임라인(5s) 중 앞 1.8s(0~36%)만 그리고,
+   나머지 3.2s는 opacity 0으로 숨겨 "1회 + 3초 텀"을 만든다. pathLength=1 정규화. */
+@keyframes trace-border {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  36% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  42% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+.animate-trace-border {
+  animation: trace-border 5s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-view-enter,
   .animate-slot-unfold,
   .animate-agenda-cascade,
-  .animate-agenda-fade {
+  .animate-agenda-fade,
+  .animate-trace-border {
     animation: none;
   }
 }

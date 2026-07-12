@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import DatePickerPopover from "./DatePickerPopover";
-import { TODAY, WEEKDAYS } from "@/lib/calendar";
+import { WEEKDAYS } from "@/lib/calendar";
+import { useToday } from "./TodayContext";
 
 interface MeetingCreateModalProps {
   open: boolean;
@@ -64,7 +65,7 @@ function formatChip(iso: string): string {
 
 /**
  * "회의 생성" 플로우 — 딤 오버레이 위 모달.
- * step 1: 회의 주제 입력 / step 2: 회의 날짜 입력(시작·종료일 피커).
+ * step 1: 회의 주제 입력 / step 2: 회의 가능 범위 설정(시작·종료일 피커).
  * 카드/요소 크기·위치는 Figma(528×287) 좌표를 그대로 사용한다.
  */
 export default function MeetingCreateModal({
@@ -72,10 +73,13 @@ export default function MeetingCreateModal({
   onClose,
   onNext,
 }: MeetingCreateModalProps) {
+  const today = useToday();
   const [step, setStep] = useState<1 | 2>(1);
   const [topic, setTopic] = useState("");
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
+  // 주제 입력 필드 포커스 여부 — 테두리 그리기 애니메이션에 쓴다
+  const [focused, setFocused] = useState(false);
   const [picker, setPicker] = useState<PickerTarget>(null);
 
   // Esc 로 닫기. 초기화는 하지 않는다 — 부모가 key 로 다시 마운트해 주므로
@@ -104,8 +108,8 @@ export default function MeetingCreateModal({
     setPicker(null);
   }
 
-  const startLabel = startDate ? formatChip(startDate) : formatChip(TODAY);
-  const endLabel = endDate ? formatChip(endDate) : formatChip(TODAY);
+  const startLabel = startDate ? formatChip(startDate) : formatChip(today);
+  const endLabel = endDate ? formatChip(endDate) : formatChip(today);
 
   // 1단계는 주제를 입력해야 넘어간다. 2단계는 날짜를 비워도 오늘로 자동 설정된다.
   const trimmedTopic = topic.trim();
@@ -118,8 +122,8 @@ export default function MeetingCreateModal({
     } else {
       onNext?.({
         topic: trimmedTopic,
-        startDate: startDate ?? TODAY,
-        endDate: endDate ?? startDate ?? TODAY,
+        startDate: startDate ?? today,
+        endDate: endDate ?? startDate ?? today,
       });
     }
   }
@@ -148,14 +152,42 @@ export default function MeetingCreateModal({
                 회의 주제를 입력해주세요
               </h2>
 
-              <input
-                type="text"
-                autoFocus
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="예) 신규 부서 개설 논의 미팅"
-                className="absolute left-1/2 top-[88px] h-[62px] w-[418px] -translate-x-1/2 rounded-[18px] bg-gray-300 px-[24px] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-1000 outline-none placeholder:text-gray-600"
-              />
+              <div className="absolute left-1/2 top-[88px] h-[62px] w-[418px] -translate-x-1/2">
+                <input
+                  type="text"
+                  autoFocus
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  onFocus={() => setFocused(true)}
+                  onBlur={() => setFocused(false)}
+                  placeholder="예) 신규 부서 개설 논의 미팅"
+                  className="h-full w-full rounded-[18px] bg-gray-300 px-[24px] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-1000 outline-none placeholder:text-gray-600"
+                />
+                {/* 포커스하면 짧은 호가 테두리를 한 바퀴 돌고 사라진 뒤 3초 쉬었다 반복한다.
+                    strokeDasharray "0.3 0.7" = 둘레의 30%만 그려진 선, 나머지는 빈 구간. */}
+                <svg
+                  viewBox="0 0 418 62"
+                  fill="none"
+                  aria-hidden
+                  className={`pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-300 ${
+                    focused ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <rect
+                    x="1"
+                    y="1"
+                    width="416"
+                    height="60"
+                    rx="17"
+                    stroke="#ffb27a"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    pathLength={1}
+                    strokeDasharray="0.3 0.7"
+                    className={focused ? "animate-trace-border" : ""}
+                  />
+                </svg>
+              </div>
             </>
           ) : (
             /* ── 2단계: 회의 날짜 ── */
@@ -164,7 +196,7 @@ export default function MeetingCreateModal({
                 id="meeting-modal-title"
                 className="absolute left-1/2 top-[36px] -translate-x-1/2 whitespace-nowrap text-[24px] font-semibold leading-[1.6] tracking-[-0.5px] text-black"
               >
-                회의 날짜를 입력해주세요
+                회의 가능 범위를 설정해주세요
               </h2>
 
               <p className="absolute left-1/2 top-[78px] -translate-x-1/2 whitespace-nowrap text-[16px] font-normal leading-[1.6] tracking-[-0.5px] text-gray-700">
