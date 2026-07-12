@@ -31,7 +31,7 @@ export default function MeetingReplyView({
   onClose,
   onSubmit,
 }: MeetingReplyViewProps) {
-  const { topic, participants, startDate } = invite;
+  const { topic, participants, startDate, dateLabel } = invite;
 
   // 참석자 전원이 안 되는 시간대는 숨긴다. 모두 가능한 시간대를 위로.
   const slots = useMemo(() => {
@@ -82,7 +82,9 @@ export default function MeetingReplyView({
         {/* ── 헤더 ── */}
         <div className="shrink-0 pl-[3px]">
           <p className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
-            <span className="text-carrot-600">{topic}</span> 회의 일정에
+            <span className="text-carrot-600">{topic}</span>
+            <span className="mx-[6px] inline-block size-[6px] rounded-full bg-[#cfd4dd] align-middle" />
+            <span className="text-carrot-600">{dateLabel}</span> 회의 일정에
             초대받았어요.
           </p>
           <h1 className="mt-[10px] text-[28px] font-bold leading-[1.6] tracking-[-0.5px] text-black">
