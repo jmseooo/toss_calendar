@@ -102,7 +102,7 @@ export default function AgendaPanel() {
             toggleRole();
             setNotifOpen(true);
           }}
-          className={`flex h-[42px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-full bg-gray-00 px-[14px] text-[15px] font-semibold leading-[1.6] tracking-[-0.5px] text-black transition duration-150 ease-out hover:scale-[1.04] hover:bg-gray-300/50 active:scale-[0.98] ${
+          className={`flex h-[42px] w-[128px] shrink-0 items-center justify-center gap-[6px] whitespace-nowrap rounded-full bg-gray-00 text-[15px] font-semibold leading-[1.6] tracking-[-0.5px] text-black transition duration-150 ease-out hover:scale-[1.04] hover:bg-gray-300/50 active:scale-[0.98] xl:w-[144px] xl:gap-[8px] xl:text-[16px] ${
             nudge ? "animate-nudge-pulse" : ""
           }`}
         >
