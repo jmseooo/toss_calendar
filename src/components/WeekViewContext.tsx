@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { TODAY, addDays } from "@/lib/calendar";
+import { useToday } from "./TodayContext";
 
 /**
  * 주간 뷰에서 표시 중인 "주"를 공유하는 컨텍스트.
@@ -29,14 +30,23 @@ interface WeekViewContextValue {
 const WeekViewContext = createContext<WeekViewContextValue | null>(null);
 
 export function WeekViewProvider({ children }: { children: ReactNode }) {
-  // 처음엔 실제 오늘이 속한 주를 보여준다.
+  const today = useToday();
+  // 첫 렌더는 고정 기준일(SSR 안전)로, 마운트 뒤 실제 오늘이 속한 주로 맞춘다.
   const [anchor, setAnchor] = useState<string>(TODAY);
+
+  // today가 실제 오늘로 바뀌면 그 날짜로 앵커를 옮긴다.
+  // 이펙트가 아니라 이전 값과 비교해 렌더 중에 조정한다(React 권장 패턴).
+  const [prevToday, setPrevToday] = useState(today);
+  if (prevToday !== today) {
+    setPrevToday(today);
+    setAnchor(today);
+  }
 
   // 참조가 안정적이어야 한다. 주간 그리드의 휠 핸들러(useWheelPaging)가 이 함수들을
   // 의존성으로 재등록되는데, 매 렌더 새 함수면 휠 누적량과 쿨다운이 초기화된다.
   const goPrev = useCallback(() => setAnchor((a) => addDays(a, -7)), []);
   const goNext = useCallback(() => setAnchor((a) => addDays(a, 7)), []);
-  const goToday = useCallback(() => setAnchor(TODAY), []);
+  const goToday = useCallback(() => setAnchor(today), [today]);
 
   const value = useMemo(
     () => ({ anchor, goPrev, goNext, goToday }),

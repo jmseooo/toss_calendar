@@ -7,11 +7,13 @@ import { MonthViewProvider } from "@/components/MonthViewContext";
 import { WeekViewProvider } from "@/components/WeekViewContext";
 import { ViewModeProvider } from "@/components/ViewModeContext";
 import { InviteProvider } from "@/components/InviteContext";
+import { TodayProvider } from "@/components/TodayContext";
 
 export default function Home() {
   return (
     // 사이드바 | 캘린더 | 일별 캘린더(아젠다) 3열을 항상 나란히 유지.
     // 가로폭이 줄면 캘린더가 함께 줄어들고, 일별 캘린더는 늘 우측에 같이 표시된다.
+    <TodayProvider>
     <ViewModeProvider>
       <MonthViewProvider>
         <WeekViewProvider>
@@ -41,5 +43,6 @@ export default function Home() {
         </WeekViewProvider>
       </MonthViewProvider>
     </ViewModeProvider>
+    </TodayProvider>
   );
 }

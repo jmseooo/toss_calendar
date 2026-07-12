@@ -1,12 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import {
-  buildWeekGrid,
-  TODAY,
-  WEEKDAYS,
-  type DayCell,
-} from "@/lib/calendar";
+import { buildWeekGrid, WEEKDAYS, type DayCell } from "@/lib/calendar";
 import { useWheelPaging } from "@/lib/useWheelPaging";
 import {
   eventsByDate,
@@ -18,6 +13,7 @@ import { LocationIcon } from "./icons";
 import { useDayView } from "./DayViewContext";
 import { useWeekView } from "./WeekViewContext";
 import { useInvite } from "./InviteContext";
+import { useToday } from "./TodayContext";
 
 /** 시간 일정 카드: 옅은 채움 배경 */
 const CARD_FILL: Record<EventColor, string> = {
@@ -45,7 +41,7 @@ const CARD_TEXT: Record<EventColor, string> = {
  */
 export default function WeekGrid() {
   const { anchor, goPrev, goNext } = useWeekView();
-  const cells = buildWeekGrid(anchor, TODAY);
+  const cells = buildWeekGrid(anchor, useToday());
   const rootRef = useRef<HTMLDivElement>(null);
 
   useWheelPaging(rootRef, goPrev, goNext); // 휠로 이전/다음 주

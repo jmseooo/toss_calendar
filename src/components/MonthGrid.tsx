@@ -1,25 +1,21 @@
 "use client";
 
 import { useRef, useState } from "react";
-import {
-  buildMonthGrid,
-  TODAY,
-  WEEKDAYS,
-  type DayCell,
-} from "@/lib/calendar";
+import { buildMonthGrid, WEEKDAYS, type DayCell } from "@/lib/calendar";
 import { useWheelPaging } from "@/lib/useWheelPaging";
 import { eventsByDate } from "@/data/events";
 import EventChip from "./EventChip";
 import { useDayView } from "./DayViewContext";
 import { useMonthView } from "./MonthViewContext";
 import { useInvite } from "./InviteContext";
+import { useToday } from "./TodayContext";
 
 const MAX_VISIBLE = 2; // 칸에 최대로 보여줄 칩 개수
 
 /** 월간 캘린더 카드 (요일 헤더 + 6주 그리드) */
 export default function MonthGrid() {
   const { year, month, goPrev, goNext } = useMonthView();
-  const cells = buildMonthGrid(year, month, TODAY);
+  const cells = buildMonthGrid(year, month, useToday());
   const rootRef = useRef<HTMLDivElement>(null);
 
   useWheelPaging(rootRef, goPrev, goNext); // 휠로 이전/다음 달

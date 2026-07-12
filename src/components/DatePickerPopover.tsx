@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "./icons";
-import { WEEKDAYS, buildMonthGrid, TODAY, yearMonthOf } from "@/lib/calendar";
+import { WEEKDAYS, buildMonthGrid, yearMonthOf } from "@/lib/calendar";
+import { useToday } from "./TodayContext";
 
 interface DatePickerPopoverProps {
   /** 현재 선택된 날짜 ISO (YYYY-MM-DD). 없으면 null */
@@ -26,14 +27,15 @@ export default function DatePickerPopover({
   onSelect,
   className = "",
 }: DatePickerPopoverProps) {
-  const seed = value ?? TODAY;
+  const today = useToday();
+  const seed = value ?? today;
   const { year: seedYear, month: seedMonth } = yearMonthOf(seed);
   const [view, setView] = useState({ year: seedYear, month: seedMonth });
 
-  const cells = buildMonthGrid(view.year, view.month, TODAY);
+  const cells = buildMonthGrid(view.year, view.month, today);
 
   // 이번 달(오늘이 속한 달)보다 앞으로는 갈 수 없다.
-  const { year: todayYear, month: todayMonth } = yearMonthOf(TODAY);
+  const { year: todayYear, month: todayMonth } = yearMonthOf(today);
   const atFirstMonth =
     view.year < todayYear ||
     (view.year === todayYear && view.month <= todayMonth);
@@ -92,7 +94,7 @@ export default function DatePickerPopover({
         <div className="grid grid-cols-7">
           {cells.map((cell) => {
             const selected = value === cell.date;
-            const past = cell.date < TODAY; // ISO 문자열이라 사전순 비교 = 날짜순 비교
+            const past = cell.date < today; // ISO 문자열이라 사전순 비교 = 날짜순 비교
             const disabled = !cell.inMonth || past;
             return (
               <button
