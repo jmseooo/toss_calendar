@@ -97,7 +97,7 @@ export default function AgendaPanel() {
 
       {/* key={baseDate} — 날짜를 새로 고를 때마다 아래 전체가 다시 마운트되어
           촤라락 애니메이션이 매번 처음부터 재생된다. */}
-      <div key={baseDate} className="mt-[19px] flex flex-col gap-[30px]">
+      <div key={baseDate} className="mt-[19px] flex flex-col gap-[22px]">
         {dates.map((date, i) => (
           <DayCard
             key={date}
