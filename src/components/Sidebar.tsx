@@ -52,11 +52,12 @@ export default function Sidebar() {
   const [confirmMeetingId, setConfirmMeetingId] = useState<string | null>(null);
   const [inviteMeetingId, setInviteMeetingId] = useState<string | null>(null);
 
-  // 역할을 바꾸면 그쪽 알림이 먼저 보이도록 패널을 펼치고 열린 화면을 닫는다.
+  // 역할을 바꾸면 열려 있던 화면(회의 확정·답변·초대 뷰)을 닫는다.
+  // 패널 열기(setNotifOpen)는 다른 컴포넌트 상태라 렌더 중 호출할 수 없어,
+  // 역할 토글 버튼(AgendaPanel)의 클릭 핸들러에서 처리한다.
   const [prevRole, setPrevRole] = useState(role);
   if (prevRole !== role) {
     setPrevRole(role);
-    setNotifOpen(true);
     setReplyMeetingId(null);
     setConfirmMeetingId(null);
     setInviteMeetingId(null);

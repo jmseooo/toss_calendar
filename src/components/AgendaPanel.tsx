@@ -11,6 +11,7 @@ import {
 } from "@/data/events";
 import { addDays, formatAgendaHeading } from "@/lib/calendar";
 import { useToday } from "./TodayContext";
+import { useNotifPanel } from "./NotifPanelContext";
 import Avatar from "./Avatar";
 import { avatarByIndex } from "@/data/avatars";
 
@@ -53,6 +54,7 @@ const FILLED: Record<EventColor, string> = {
 export default function AgendaPanel() {
   const { selectedDate } = useDayView();
   const { role, toggleRole, meetings } = useInvite();
+  const { setOpen: setNotifOpen } = useNotifPanel();
   const today = useToday();
 
   // 전환 버튼이 통통 튀며 "반대편 화면으로 넘어가 보라"고 유도하는 시점:
@@ -79,7 +81,11 @@ export default function AgendaPanel() {
       <div className="flex min-h-[57px] items-center">
         <button
           type="button"
-          onClick={toggleRole}
+          onClick={() => {
+            // 역할을 바꾸면 그쪽 알림을 먼저 보여준다 (알림 패널 열기 → 아젠다 접힘).
+            toggleRole();
+            setNotifOpen(true);
+          }}
           className={`flex h-[42px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-full bg-gray-00 px-[14px] text-[15px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-700 transition duration-150 ease-out hover:scale-[1.04] hover:bg-gray-300/50 active:scale-[0.98] ${
             nudge ? "animate-bounce" : ""
           }`}
