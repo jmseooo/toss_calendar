@@ -34,10 +34,9 @@ export default function MeetingInviteView({
   const [sent, setSent] = useState(false);
 
   // 최근검색 후보: 이 회의의 필수 참석자로 이미 들어간 사람은 뺀다.
-  const recent = RECENT_POOL.filter((n) => !meeting.participants.includes(n)).slice(
-    0,
-    5,
-  );
+  const recent = RECENT_POOL.filter(
+    (n) => !meeting.participants.includes(n),
+  ).slice(0, 5);
 
   const q = query.trim();
   const results = q
@@ -65,8 +64,8 @@ export default function MeetingInviteView({
             "radial-gradient(120% 80% at 50% -10%, #ffe9dd 0%, #ffffff 55%)",
         }}
       >
-        <div className="flex size-[92px] items-center justify-center rounded-full bg-[#ff9364] text-white">
-          <CheckIcon size={44} />
+        <div className="flex size-[46px] items-center justify-center rounded-full bg-[#ff9364] text-white">
+          <CheckIcon size={26} />
         </div>
         <h1 className="mt-[24px] text-center text-[28px] font-bold leading-[1.5] tracking-[-0.5px] text-gray-1000">
           회의 초대를 완료했어요
@@ -139,31 +138,20 @@ export default function MeetingInviteView({
           </p>
         </div>
 
-        {/* ── 메타 줄: 주제·날짜 / 참석자 칩 ── */}
+        {/* ── 메타 줄: 주제 · 날짜·시간 ── */}
         <div className="mt-[24px] flex shrink-0 flex-wrap items-center gap-x-[10px] gap-y-[8px] pl-[3px]">
           <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
             {meeting.topic}
           </span>
-          <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-ev-blue">
+          <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-[#6373ff]">
             {meeting.dateLabel} {meeting.time}
           </span>
-          <span className="ml-auto text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-700">
-            참석자
-          </span>
-          {meeting.participants.map((n, i) => (
-            <span
-              key={`${n}-${i}`}
-              className="flex h-[36px] shrink-0 items-center justify-center whitespace-nowrap rounded-[6px] border border-gray-300 px-[10px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800"
-            >
-              {n}
-            </span>
-          ))}
         </div>
 
-        {/* ── 카드: 좌측 검색·최근 / 우측 참석 ── */}
-        <div className="mt-[28px] flex h-[628px] min-h-0 gap-[40px] overflow-hidden rounded-[36px] bg-white px-[40px] py-[40px] shadow-card">
+        {/* ── 카드: 좌측 검색·최근 / 우측 참석 ── 높이는 내용만큼(약 300px). */}
+        <div className="mt-[28px] flex shrink-0 gap-[40px] rounded-[36px] bg-white px-[40px] py-[28px] shadow-card">
           {/* 좌측 */}
-          <div className="relative w-[399px] shrink-0 overflow-y-auto">
+          <div className="relative w-[399px] shrink-0">
             {/* 검색 바 */}
             <div className="flex h-[42px] items-center gap-[8px] rounded-[24px] bg-[#f7f8f9] pl-[18px] pr-[15px]">
               <input
@@ -229,35 +217,55 @@ export default function MeetingInviteView({
             </div>
           </div>
 
-          {/* 우측 — 참석(선택한 사람) */}
-          <div className="min-w-0 flex-1 overflow-y-auto">
-            <p className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-1000">
-              참석
-            </p>
-            {selected.length === 0 ? (
-              <p className="mt-[24px] text-[16px] font-medium leading-[1.6] tracking-[-0.5px] text-gray-600">
-                선택하면 여기에 표시됩니다
+          {/* 우측 — 선택 참석 + 확정 참석 */}
+          <div className="flex min-w-0 flex-1 flex-col gap-[36px]">
+            {/* 선택 참석 — 지금 초대하는 사람들 (점선 칩, 누르면 제외) */}
+            <div className="flex flex-col gap-[16px]">
+              <p className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-1000">
+                선택 참석
               </p>
-            ) : (
-              <div className="mt-[20px] flex flex-wrap gap-[10px]">
-                {selected.map((n) => (
+              {selected.length === 0 ? (
+                <p className="text-[16px] font-medium leading-[1.6] tracking-[-0.5px] text-gray-600">
+                  선택하면 여기에 표시됩니다
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-[10px]">
+                  {selected.map((n) => (
+                    <span
+                      key={n}
+                      className="flex h-[36px] min-w-[98px] shrink-0 items-center justify-center gap-[6px] whitespace-nowrap rounded-[6px] border border-dashed border-gray-600 bg-white pl-[10px] pr-[7px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800"
+                    >
+                      {n}
+                      <button
+                        type="button"
+                        onClick={() => remove(n)}
+                        aria-label={`${n} 삭제`}
+                        className="shrink-0 text-gray-500 transition-colors hover:text-gray-800"
+                      >
+                        <CloseIcon size={14} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 확정 참석 — 이미 확정된 필수 참석자 (채운 칩) */}
+            <div className="flex flex-col gap-[16px]">
+              <p className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-1000">
+                확정 참석
+              </p>
+              <div className="flex flex-wrap gap-[10px]">
+                {meeting.participants.map((n, i) => (
                   <span
-                    key={n}
-                    className="flex h-[36px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-[6px] border border-gray-300 pl-[10px] pr-[7px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800"
+                    key={`${n}-${i}`}
+                    className="flex h-[36px] min-w-[98px] shrink-0 items-center justify-center whitespace-nowrap rounded-[6px] bg-[#f1f1ff] px-[10px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800"
                   >
                     {n}
-                    <button
-                      type="button"
-                      onClick={() => remove(n)}
-                      aria-label={`${n} 삭제`}
-                      className="shrink-0 text-gray-500 transition-colors hover:text-gray-800"
-                    >
-                      <CloseIcon size={14} />
-                    </button>
                   </span>
                 ))}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
