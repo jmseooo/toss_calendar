@@ -68,7 +68,7 @@ export default function MeetingInviteView({
           <CheckIcon size={26} />
         </div>
         <h1 className="mt-[24px] text-center text-[28px] font-bold leading-[1.5] tracking-[-0.5px] text-gray-1000">
-          회의 초대를 완료했어요
+          선택 참여자 회의 초대를 완료했어요
         </h1>
 
         <div className="mt-[36px] flex w-[738px] max-w-full flex-col items-center gap-[20px] rounded-[30px] bg-white px-[40px] py-[36px] shadow-card">
