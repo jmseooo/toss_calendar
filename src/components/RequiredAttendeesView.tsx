@@ -32,7 +32,7 @@ const DIRECTORY = PEOPLE;
 
 /* 좌측 카드 — "최근" 초기 목록. 실제 명단(PEOPLE)에 있는 이름만 사용하며,
    검색해서 참석자를 추가하면 그 사람이 이 목록 맨 앞에 쌓인다. */
-const INITIAL_RECENT: string[] = [SELF, "김민준", "이서연", "박지훈", "최수빈"];
+const INITIAL_RECENT: string[] = ["김민준", "이서연", SELF, "박지훈", "최수빈"];
 
 /* 불가능 카드에서 이름 칩을 최대 몇 개까지 노출할지 (나머지는 "+N") */
 const MAX_BLOCKED_CHIPS = 6;
