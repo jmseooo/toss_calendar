@@ -8,6 +8,8 @@ import type { InviteInfo } from "./InviteContext";
 interface MeetingConfirmViewProps {
   open: boolean;
   invite: InviteInfo;
+  /** 참여자가 답변에서 고른 시간대(hour) — 확정 화면엔 이 시간대만 보여준다 */
+  selectedHours: number[];
   /** 초대자가 답변에서 고른(또는 좋아요한) 시간대 — 처음 선택 상태의 기본값 */
   initialHour?: number;
   /** "뒤로" / Esc — 닫기 */
@@ -30,22 +32,23 @@ const MAX_AVATARS = 4;
 export default function MeetingConfirmView({
   open,
   invite,
+  selectedHours,
   initialHour,
   onClose,
   onConfirm,
 }: MeetingConfirmViewProps) {
   const { topic, participants, startDate, dateLabel } = invite;
 
-  // 참석자 전원이 안 되는 시간대는 고를 이유가 없어 숨긴다 (일정 찾기 화면과 같은 규칙).
-  // 모두 가능한 시간대를 위로, 일부 불가능한 시간대를 아래로.
+  // 참여자가 고른 시간대만 보여준다. 모두 가능한 시간대를 위로, 일부 불가능한 시간대를 아래로.
   const slots = useMemo(() => {
+    const picked = new Set(selectedHours);
     const shown = buildDaySlots(participants, startDate).filter(
-      (slot) => slot.blockedBy.length < participants.length,
+      (slot) => picked.has(slot.hour),
     );
     const available = shown.filter((slot) => slot.blockedBy.length === 0);
     const blocked = shown.filter((slot) => slot.blockedBy.length > 0);
     return [...available, ...blocked];
-  }, [participants, startDate]);
+  }, [participants, startDate, selectedHours]);
 
   // 기본 선택 = 초대자가 고른 시간대(있고 목록에 남아 있으면). 없으면 1순위(첫 시간대).
   const defaultHour =

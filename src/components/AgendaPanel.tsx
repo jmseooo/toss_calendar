@@ -50,15 +50,17 @@ const FILLED: Record<EventColor, string> = {
  */
 export default function AgendaPanel() {
   const { selectedDate } = useDayView();
-  const { role, toggleRole, invite, reply } = useInvite();
+  const { role, toggleRole, meetings } = useInvite();
   const today = useToday();
 
   // 전환 버튼이 통통 튀며 "반대편 화면으로 넘어가 보라"고 유도하는 시점:
-  //  - 주최자: 초대를 보냈고 아직 참여자 답변 전 → 참여자 화면으로
-  //  - 참여자: 일정을 선택해 답변한 뒤 → 주최자 화면으로 (확정하러)
-  const nudge =
-    invite !== null &&
-    (role === "organizer" ? reply === null : reply !== null);
+  //  - 주최자: 참여자 답변을 기다리는 회의가 있으면 → 참여자 화면으로
+  //  - 참여자: 답변했지만 아직 확정 안 된 회의가 있으면 → 주최자 화면으로 (확정하러)
+  const nudge = meetings.some((m) =>
+    role === "organizer"
+      ? m.reply === null
+      : m.reply !== null && m.confirmedTime === null,
+  );
 
   // 기준 날짜: 월간 그리드에서 고른 날짜, 없으면 오늘.
   // 이 날짜를 맨 위에 두고 그 아래로 "다음 날짜"들을 하루씩 이어 붙인다.

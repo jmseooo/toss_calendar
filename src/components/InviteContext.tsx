@@ -37,19 +37,48 @@ export interface ReplySelection {
   liked: number[];
 }
 
-interface InviteContextValue {
-  /** 아직 초대를 안 보냈으면 null */
-  invite: InviteInfo | null;
-  sendInvite: (info: InviteInfo) => void;
-  clearInvite: () => void;
-  /** 참여자가 보낸 답변 — 아직 안 보냈으면 null. 주최자의 "일정 확정" 알림은 이때부터 뜬다 */
+/** 확정된 회의 — "선택 참여자 초대" 알림·화면에 쓰인다 */
+export interface ConfirmedMeeting {
+  id: string;
+  topic: string;
+  /** "07.02 (목)" */
+  dateLabel: string;
+  /** "10:00~11:00" */
+  time: string;
+  /** 필수 참석자 이름 목록 */
+  participants: string[];
+}
+
+/**
+ * 회의 한 건의 생애주기. 초대 → 답변 → 확정 → 선택참여자 초대 순으로 필드가 채워진다.
+ * 목록(meetings)에서 사라지지 않으므로, 각 단계의 알림이 새로고침 전까지 계속 쌓인다.
+ */
+export interface Meeting {
+  id: string;
+  info: InviteInfo;
+  /** 참여자 답변 (없으면 아직 미답변) */
   reply: ReplySelection | null;
-  submitReply: (hours: number[], liked: number[]) => void;
+  /** 확정 시간 "10:00~11:00" (없으면 미확정) */
+  confirmedTime: string | null;
+  /** 선택 참여자 초대까지 마쳤는지 */
+  optionalSent: boolean;
+  /** 각 단계 발생 시각 — 알림을 최신순으로 정렬하는 데 쓴다 */
+  createdAt: number;
+  repliedAt: number | null;
+  confirmedAt: number | null;
+}
+
+interface InviteContextValue {
+  /** 초대된 회의들 — 단계와 무관하게 계속 남는다 */
+  meetings: Meeting[];
+  sendInvite: (info: InviteInfo) => void;
+  submitReply: (id: string, hours: number[], liked: number[]) => void;
+  confirmMeeting: (id: string, event: CalendarEvent, time: string) => void;
+  markOptionalSent: (id: string) => void;
   /** 주최자가 확정해 캘린더에 올린 회의들 */
   confirmedEvents: CalendarEvent[];
   /** 방금 확정한 이벤트 id — 캘린더에서 펼침 애니메이션 대상 */
   lastConfirmedId: string | null;
-  confirmMeeting: (event: CalendarEvent) => void;
   role: ViewRole;
   toggleRole: () => void;
 }
@@ -57,28 +86,56 @@ interface InviteContextValue {
 const InviteContext = createContext<InviteContextValue | null>(null);
 
 export function InviteProvider({ children }: { children: ReactNode }) {
-  const [invite, setInvite] = useState<InviteInfo | null>(null);
-  const [reply, setReply] = useState<ReplySelection | null>(null);
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [confirmedEvents, setConfirmedEvents] = useState<CalendarEvent[]>([]);
   const [lastConfirmedId, setLastConfirmedId] = useState<string | null>(null);
   const [role, setRole] = useState<ViewRole>("organizer");
 
-  // 새 초대를 보내면 답변을 초기화한다.
   const sendInvite = useCallback((info: InviteInfo) => {
-    setInvite(info);
-    setReply(null);
-  }, []);
-  const clearInvite = useCallback(() => {
-    setInvite(null);
-    setReply(null);
+    setMeetings((prev) => [
+      ...prev,
+      {
+        id: `m-${Date.now()}-${prev.length}`,
+        info,
+        reply: null,
+        confirmedTime: null,
+        optionalSent: false,
+        createdAt: Date.now(),
+        repliedAt: null,
+        confirmedAt: null,
+      },
+    ]);
   }, []);
   const submitReply = useCallback(
-    (hours: number[], liked: number[]) => setReply({ hours, liked }),
+    (id: string, hours: number[], liked: number[]) => {
+      setMeetings((prev) =>
+        prev.map((m) =>
+          m.id === id
+            ? { ...m, reply: { hours, liked }, repliedAt: Date.now() }
+            : m,
+        ),
+      );
+    },
     [],
   );
-  const confirmMeeting = useCallback((event: CalendarEvent) => {
-    setConfirmedEvents((prev) => [...prev, event]);
-    setLastConfirmedId(event.id);
+  const confirmMeeting = useCallback(
+    (id: string, event: CalendarEvent, time: string) => {
+      setConfirmedEvents((prev) => [...prev, event]);
+      setLastConfirmedId(event.id);
+      setMeetings((prev) =>
+        prev.map((m) =>
+          m.id === id
+            ? { ...m, confirmedTime: time, confirmedAt: Date.now() }
+            : m,
+        ),
+      );
+    },
+    [],
+  );
+  const markOptionalSent = useCallback((id: string) => {
+    setMeetings((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, optionalSent: true } : m)),
+    );
   }, []);
   const toggleRole = useCallback(
     () => setRole((r) => (r === "organizer" ? "invitee" : "organizer")),
@@ -87,26 +144,24 @@ export function InviteProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      invite,
+      meetings,
       sendInvite,
-      clearInvite,
-      reply,
       submitReply,
+      confirmMeeting,
+      markOptionalSent,
       confirmedEvents,
       lastConfirmedId,
-      confirmMeeting,
       role,
       toggleRole,
     }),
     [
-      invite,
+      meetings,
       sendInvite,
-      clearInvite,
-      reply,
       submitReply,
+      confirmMeeting,
+      markOptionalSent,
       confirmedEvents,
       lastConfirmedId,
-      confirmMeeting,
       role,
       toggleRole,
     ],
