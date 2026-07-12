@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { buildWeekGrid, WEEKDAYS, type DayCell } from "@/lib/calendar";
 import { useWheelPaging } from "@/lib/useWheelPaging";
 import {
@@ -161,6 +161,15 @@ function WeekEventCard({
 }) {
   const { openDay } = useDayView();
 
+  // 임시 카드 덮개(cover) 제거용 — 애니메이션이 끝까지 못 가더라도, 재생 시간이
+  // 지나면 덮개를 아예 없애 정적 점선 테두리(네 변 완성)가 확실히 남게 한다.
+  const [coverGone, setCoverGone] = useState(false);
+  useEffect(() => {
+    if (!justAdded || !event.tentative) return;
+    const t = window.setTimeout(() => setCoverGone(true), 760);
+    return () => window.clearTimeout(t);
+  }, [justAdded, event.tentative]);
+
   // 임시(가) 일정 — 주황 점선 카드 (Figma 243:9275). 탭하면 펼침 애니메이션과 함께 생기고,
   // 점선 테두리는 한 획이 둘레를 한 바퀴 그린 뒤 점선으로 남는다.
   if (event.tentative) {
@@ -193,8 +202,9 @@ function WeekEventCard({
             vectorEffect="non-scaling-stroke"
             strokeDasharray="4 4"
           />
-          {/* 카드 배경색(#fff) 획 — 처음 생길 때 점선을 덮었다가 걷힌다 */}
-          {justAdded && (
+          {/* 카드 배경색(#fff) 획 — 처음 생길 때 점선을 덮었다가 걷힌다.
+              재생이 끝나면(coverGone) 아예 제거해 네 변이 확실히 남게 한다. */}
+          {justAdded && !coverGone && (
             <rect
               x="0.5"
               y="0.5"
