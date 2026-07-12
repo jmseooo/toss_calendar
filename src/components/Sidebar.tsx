@@ -14,7 +14,7 @@ import MeetingReplyView from "./MeetingReplyView";
  * 알림은 초대를 보낸 뒤에만 생긴다.
  */
 export default function Sidebar() {
-  const { invite, clearInvite, role } = useInvite();
+  const { invite, clearInvite, role, replied, markReplied } = useInvite();
   const [notifOpen, setNotifOpen] = useState(false);
   // 알림을 누르면 "회의 일정 확정하기" 전체 화면이 열린다.
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -34,7 +34,8 @@ export default function Sidebar() {
   // 알림 내용은 주최자가 초대를 보낼 때 넘긴 실제 데이터(주제·참석자·날짜)로 채운다.
   // 참여자는 "초대받았다", 주최자는 "답변이 왔다"는 같은 초대 건을 서로 다르게 본다.
   const isInvitee = role === "invitee";
-  const notifCount = invite ? 1 : 0;
+  // 참여자는 초대 알림 1건. 주최자는 답변 도착 1건 + 참여자가 답변한 뒤 일정 확정 1건.
+  const notifCount = invite ? (isInvitee ? 1 : replied ? 2 : 1) : 0;
   const replyCount = invite?.participants.length ?? 0;
 
   return (
@@ -130,25 +131,42 @@ export default function Sidebar() {
                   </p>
                 </button>
               ) : (
-                /* 주최자 화면 — 회의 하나당 알림 하나. 답변한 참여자는 이름만 나열한다. */
-                <button
-                  type="button"
-                  onClick={() => setConfirmOpen(true)}
-                  className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex flex-col gap-[8px] rounded-[22px] px-[14px] py-[18px] text-left hover:bg-gray-100/60"
-                >
-                  <div className="flex items-center gap-[8px]">
-                    <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
-                      ‘{invite.topic}’ 회의 일정
-                    </span>
-                    <span className="size-[8px] shrink-0 rounded-full bg-[#ff6a60]" />
+                /* 주최자 화면 — 답변 도착 알림 + 일정 확정 알림, 두 건. */
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmOpen(true)}
+                    className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex flex-col gap-[8px] rounded-[22px] px-[14px] py-[18px] text-left hover:bg-gray-100/60"
+                  >
+                    <div className="flex items-center gap-[8px]">
+                      <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
+                        ‘{invite.topic}’ 회의 일정
+                      </span>
+                      <span className="size-[8px] shrink-0 rounded-full bg-[#ff6a60]" />
+                    </div>
+                    <p className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
+                      {replyCount}명의 참여자가 답변을 전송했습니다.
+                    </p>
+                    <p className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-600">
+                      {invite.participants.join(", ")}
+                    </p>
+                  </button>
+
+                  {/* 일정 확정 알림 — 참여자가 답변을 보낸 뒤에만 뜬다 */}
+                  {replied && (
+                  <div className="flex flex-col gap-[8px] rounded-[22px] px-[14px] py-[18px]">
+                    <div className="flex items-start gap-[8px]">
+                      <p className="flex-1 text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
+                        ‘{invite.topic}’ 회의 일정이 확정되었어요.
+                      </p>
+                      <span className="mt-[4px] size-[12px] shrink-0 rounded-full bg-[#ff6a60]" />
+                    </div>
+                    <p className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-600">
+                      {invite.dateLabel} {invite.recommendedTime}
+                    </p>
                   </div>
-                  <p className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
-                    {replyCount}명의 참여자가 답변을 전송했습니다.
-                  </p>
-                  <p className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-600">
-                    {invite.participants.join(", ")}
-                  </p>
-                </button>
+                  )}
+                </>
               )}
             </div>
           ) : (
@@ -183,6 +201,8 @@ export default function Sidebar() {
           invite={invite}
           onClose={() => setReplyOpen(false)}
           onSubmit={() => {
+            // 답변을 보내면 주최자 쪽에 "일정 확정" 알림이 생긴다.
+            markReplied();
             setReplyOpen(false);
             setNotifOpen(false);
           }}

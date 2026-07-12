@@ -11,6 +11,7 @@ import {
 import { useMonthView } from "./MonthViewContext";
 import { useWeekView } from "./WeekViewContext";
 import { useViewMode } from "./ViewModeContext";
+import { useInvite } from "./InviteContext";
 import MeetingCreateModal from "./MeetingCreateModal";
 import RequiredAttendeesView from "./RequiredAttendeesView";
 import { yearMonthOf } from "@/lib/calendar";
@@ -25,6 +26,8 @@ export default function CalendarToolbar() {
   const { mode, setMode } = useViewMode();
   const monthView = useMonthView();
   const weekView = useWeekView();
+  // 회의 생성은 주최자만. 초대받은 참여자 화면에서는 "일정 생성하기"를 숨긴다.
+  const { role } = useInvite();
 
   // "일정 생성하기" 드롭다운 열림 상태 + 바깥 클릭 시 닫기
   const [menuOpen, setMenuOpen] = useState(false);
@@ -125,8 +128,11 @@ export default function CalendarToolbar() {
         </div>
       </div>
 
-      {/* 일정 생성하기 — 클릭 시 아래로 드롭다운(일정 추가 / 회의 생성) */}
-      <div ref={menuRef} className="relative shrink-0">
+      {/* 일정 생성하기 — 클릭 시 아래로 드롭다운(일정 추가 / 회의 생성). 참여자 화면에선 숨김 */}
+      <div
+        ref={menuRef}
+        className={`relative shrink-0 ${role === "invitee" ? "hidden" : ""}`}
+      >
         <button
           type="button"
           aria-haspopup="menu"

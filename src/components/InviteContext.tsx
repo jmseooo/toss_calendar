@@ -35,6 +35,9 @@ interface InviteContextValue {
   invite: InviteInfo | null;
   sendInvite: (info: InviteInfo) => void;
   clearInvite: () => void;
+  /** 참여자가 답변을 보냈는지 — 주최자의 "일정 확정" 알림이 이때부터 뜬다 */
+  replied: boolean;
+  markReplied: () => void;
   role: ViewRole;
   toggleRole: () => void;
 }
@@ -43,17 +46,27 @@ const InviteContext = createContext<InviteContextValue | null>(null);
 
 export function InviteProvider({ children }: { children: ReactNode }) {
   const [invite, setInvite] = useState<InviteInfo | null>(null);
+  const [replied, setReplied] = useState(false);
   const [role, setRole] = useState<ViewRole>("organizer");
 
-  const clearInvite = useCallback(() => setInvite(null), []);
+  // 새 초대를 보내면 답변 상태를 초기화한다.
+  const sendInvite = useCallback((info: InviteInfo) => {
+    setInvite(info);
+    setReplied(false);
+  }, []);
+  const clearInvite = useCallback(() => {
+    setInvite(null);
+    setReplied(false);
+  }, []);
+  const markReplied = useCallback(() => setReplied(true), []);
   const toggleRole = useCallback(
     () => setRole((r) => (r === "organizer" ? "invitee" : "organizer")),
     [],
   );
 
   const value = useMemo(
-    () => ({ invite, sendInvite: setInvite, clearInvite, role, toggleRole }),
-    [invite, clearInvite, role, toggleRole],
+    () => ({ invite, sendInvite, clearInvite, replied, markReplied, role, toggleRole }),
+    [invite, sendInvite, clearInvite, replied, markReplied, role, toggleRole],
   );
 
   return (
