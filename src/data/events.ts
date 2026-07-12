@@ -45,6 +45,8 @@ export interface CalendarEvent {
   attendeeCount?: number;
   /** 아직 참석 확정 전의 임시(가) 일정 — 주황 점선 카드로 그린다 (선택) */
   tentative?: boolean;
+  /** 임시 일정을 "참석"으로 수락함 — 점선 대신 진한 채움 카드로 그린다 (선택) */
+  accepted?: boolean;
 }
 
 export const events: CalendarEvent[] = [

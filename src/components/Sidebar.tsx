@@ -42,6 +42,7 @@ export default function Sidebar() {
     confirmMeeting,
     markOptionalSent,
     revealOptionalMeeting,
+    acceptOptionalMeeting,
     role,
   } = useInvite();
   const { setMode } = useViewMode();
@@ -296,6 +297,8 @@ export default function Sidebar() {
                     e.stopPropagation();
                     markRead(key);
                     setOptionalAnswer("attend");
+                    // 주간 뷰의 임시 일정을 점선 → 진한 채움 카드로 바꾼다.
+                    acceptOptionalMeeting();
                   }}
                   className="flex h-[31px] flex-1 items-center justify-center rounded-[8px] bg-carrot-600 text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-white transition duration-150 ease-out hover:brightness-95 active:scale-[0.98]"
                 >
@@ -475,7 +478,7 @@ export default function Sidebar() {
       {/* 미참석 확인 알럿 (Figma 414:1598) */}
       {declineAlertOpen && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 px-[24px]"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-[24px]"
           onClick={() => setDeclineAlertOpen(false)}
         >
           <div

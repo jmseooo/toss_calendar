@@ -83,6 +83,8 @@ interface InviteContextValue {
   optionalMeeting: CalendarEvent | null;
   /** 그 임시 일정을 주간 뷰에 드러낸다 (펼침 애니메이션과 함께) */
   revealOptionalMeeting: () => void;
+  /** 그 임시 일정을 "참석"으로 수락 — 점선 대신 진한 채움 카드로 바뀐다 */
+  acceptOptionalMeeting: () => void;
   role: ViewRole;
   toggleRole: () => void;
 }
@@ -94,6 +96,7 @@ export function InviteProvider({ children }: { children: ReactNode }) {
   const [confirmedEvents, setConfirmedEvents] = useState<CalendarEvent[]>([]);
   const [lastConfirmedId, setLastConfirmedId] = useState<string | null>(null);
   const [optionalRevealed, setOptionalRevealed] = useState(false);
+  const [optionalAccepted, setOptionalAccepted] = useState(false);
   const [role, setRole] = useState<ViewRole>("organizer");
 
   const revealOptionalMeeting = useCallback(() => {
@@ -101,6 +104,7 @@ export function InviteProvider({ children }: { children: ReactNode }) {
     // 방금 생긴 임시 일정으로 지정 → 주간 뷰에서 펼침 애니메이션이 돈다.
     setLastConfirmedId(OPTIONAL_MEETING_EVENT.id);
   }, []);
+  const acceptOptionalMeeting = useCallback(() => setOptionalAccepted(true), []);
 
   const sendInvite = useCallback((info: InviteInfo) => {
     setMeetings((prev) => [
@@ -162,8 +166,11 @@ export function InviteProvider({ children }: { children: ReactNode }) {
       markOptionalSent,
       confirmedEvents,
       lastConfirmedId,
-      optionalMeeting: optionalRevealed ? OPTIONAL_MEETING_EVENT : null,
+      optionalMeeting: optionalRevealed
+        ? { ...OPTIONAL_MEETING_EVENT, accepted: optionalAccepted }
+        : null,
       revealOptionalMeeting,
+      acceptOptionalMeeting,
       role,
       toggleRole,
     }),
@@ -176,7 +183,9 @@ export function InviteProvider({ children }: { children: ReactNode }) {
       confirmedEvents,
       lastConfirmedId,
       optionalRevealed,
+      optionalAccepted,
       revealOptionalMeeting,
+      acceptOptionalMeeting,
       role,
       toggleRole,
     ],
