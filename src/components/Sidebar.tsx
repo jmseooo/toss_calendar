@@ -144,37 +144,6 @@ export default function Sidebar() {
       }
     } else {
       // 주최자
-      if (m.reply) {
-        const key = `ans-${m.id}`;
-        const at = m.repliedAt ?? m.createdAt;
-        items.push({
-          key,
-          at,
-          node: (
-            <button
-              type="button"
-              onClick={() => {
-                markRead(key);
-                setConfirmMeetingId(m.id);
-              }}
-              className={CARD}
-            >
-              <div className="flex items-center gap-[8px]">
-                <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
-                  ‘{info.topic}’ 회의 일정
-                </span>
-                {isUnread(key) && <span className={DOT} />}
-              </div>
-              <p className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
-                {info.participants.length}명의 참여자가 답변을 전송했습니다.
-              </p>
-              <p className="text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-600">
-                {info.participants.join(", ")}
-              </p>
-            </button>
-          ),
-        });
-      }
       if (m.reply && !m.confirmedTime) {
         const key = `can-${m.id}`;
         const at = m.repliedAt ?? m.createdAt;
@@ -357,8 +326,8 @@ export default function Sidebar() {
           invite={replyMtg.info}
           onClose={() => setReplyMeetingId(null)}
           onSubmit={(hours, liked) => {
+            // 답변만 기록한다. 화면은 완료 화면으로 넘어간 뒤 "홈으로"에서 닫힌다.
             submitReply(replyMtg.id, hours, liked);
-            setReplyMeetingId(null);
             setNotifOpen(false);
           }}
         />

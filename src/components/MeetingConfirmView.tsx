@@ -82,8 +82,8 @@ export default function MeetingConfirmView({
             "radial-gradient(120% 80% at 50% -10%, #ffe9dd 0%, #ffffff 55%)",
         }}
       >
-        <div className="flex size-[92px] items-center justify-center rounded-full bg-[#ff9364] text-white">
-          <CheckIcon size={44} />
+        <div className="flex size-[46px] items-center justify-center rounded-full bg-[#ff9364] text-white">
+          <CheckIcon size={26} />
         </div>
         <h1 className="mt-[24px] text-center text-[28px] font-bold leading-[1.5] tracking-[-0.5px] text-gray-1000">
           회의 일정을 확정하고,

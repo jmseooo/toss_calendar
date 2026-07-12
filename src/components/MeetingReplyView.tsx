@@ -49,6 +49,8 @@ export default function MeetingReplyView({
   );
   const [liked, setLiked] = useState<Set<number>>(() => new Set());
   const [expanded, setExpanded] = useState(false);
+  // 답변을 보내면 완료 화면으로 전환한다.
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -70,6 +72,61 @@ export default function MeetingReplyView({
     if (next.has(hour)) next.delete(hour);
     else next.add(hour);
     return next;
+  }
+
+  // ── 답변 전송 완료 화면 ──
+  if (sent) {
+    const chosen = slots.filter((s) => checked.has(s.hour));
+    return (
+      <div
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-auto px-[24px] py-[40px]"
+        style={{
+          background:
+            "radial-gradient(120% 80% at 50% -10%, #ffe9dd 0%, #ffffff 55%)",
+        }}
+      >
+        <div className="flex size-[46px] items-center justify-center rounded-full bg-[#ff9364] text-white">
+          <CheckIcon size={26} />
+        </div>
+        <h1 className="mt-[24px] text-center text-[28px] font-bold leading-[1.5] tracking-[-0.5px] text-gray-1000">
+          답변을 전송했어요
+        </h1>
+        <p className="mt-[6px] text-[16px] font-medium leading-[1.6] tracking-[-0.5px] text-gray-600">
+          회의 일정이 확정되면 알려드릴게요
+        </p>
+
+        <div className="mt-[36px] flex w-[738px] max-w-full flex-col items-center gap-[20px] rounded-[30px] bg-white px-[40px] py-[36px] shadow-card">
+          <div className="flex items-center gap-[10px]">
+            <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
+              {topic}
+            </span>
+            <span className="size-[6px] rounded-full bg-[#cfd4dd]" />
+            <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-800">
+              {dateLabel}
+            </span>
+          </div>
+
+          <div className="flex w-full flex-col gap-[10px]">
+            {chosen.map((s) => (
+              <div
+                key={s.hour}
+                className="w-full rounded-[22px] bg-[#f5f6ff] px-[24px] py-[18px] text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-[#6373ff]"
+              >
+                {s.time}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-[36px] flex h-[57px] w-[336px] max-w-full items-center justify-center rounded-[18px] bg-white text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-carrot-600 shadow-card transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95"
+        >
+          홈으로
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -227,12 +284,14 @@ export default function MeetingReplyView({
           <button
             type="button"
             disabled={checked.size === 0}
-            onClick={() =>
+            onClick={() => {
+              // 답변을 기록하고 완료 화면으로 전환한다.
               onSubmit(
                 [...checked].sort((a, b) => a - b),
                 [...liked].sort((a, b) => a - b),
-              )
-            }
+              );
+              setSent(true);
+            }}
             className="flex h-[57px] flex-1 items-center justify-center rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:brightness-100"
           >
             이 일정으로 전달하기
