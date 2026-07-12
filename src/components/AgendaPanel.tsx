@@ -53,9 +53,12 @@ export default function AgendaPanel() {
   const { role, toggleRole, invite, reply } = useInvite();
   const today = useToday();
 
-  // 주최자가 초대를 보낸 뒤, 아직 참여자 답변이 오기 전까지 전환 버튼이 통통 튀며
-  // "참여자 화면으로 넘어가 보라"고 유도한다.
-  const nudge = invite !== null && role === "organizer" && reply === null;
+  // 전환 버튼이 통통 튀며 "반대편 화면으로 넘어가 보라"고 유도하는 시점:
+  //  - 주최자: 초대를 보냈고 아직 참여자 답변 전 → 참여자 화면으로
+  //  - 참여자: 일정을 선택해 답변한 뒤 → 주최자 화면으로 (확정하러)
+  const nudge =
+    invite !== null &&
+    (role === "organizer" ? reply === null : reply !== null);
 
   // 기준 날짜: 월간 그리드에서 고른 날짜, 없으면 오늘.
   // 이 날짜를 맨 위에 두고 그 아래로 "다음 날짜"들을 하루씩 이어 붙인다.
