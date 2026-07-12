@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { buildDaySlots } from "@/data/schedules";
 import { CheckIcon, StarIcon } from "./icons";
 import CompletionGlow from "./CompletionGlow";
@@ -53,6 +53,14 @@ export default function MeetingReplyView({
   // 답변을 보내면 완료 화면으로 전환한다.
   const [sent, setSent] = useState(false);
 
+  // 첫 슬롯 별(좋아요) 위에 3초간 뜨는 안내 말풍선. 스크롤 컨테이너가 잘라내지
+  // 않도록 카드 기준으로 별 위치를 측정해 카드 레벨에 그린다.
+  const cardRef = useRef<HTMLDivElement>(null);
+  const firstStarRef = useRef<HTMLButtonElement>(null);
+  const [tipPos, setTipPos] = useState<{ top: number; left: number } | null>(
+    null,
+  );
+
   useEffect(() => {
     if (!open) return;
     function onKeyDown(e: KeyboardEvent) {
@@ -61,6 +69,19 @@ export default function MeetingReplyView({
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open) return;
+    const star = firstStarRef.current;
+    const card = cardRef.current;
+    if (star && card) {
+      const s = star.getBoundingClientRect();
+      const c = card.getBoundingClientRect();
+      setTipPos({ top: s.top - c.top, left: s.left - c.left + s.width / 2 });
+    }
+    const t = window.setTimeout(() => setTipPos(null), 3000);
+    return () => window.clearTimeout(t);
+  }, [open]);
 
   if (!open) return null;
 
@@ -149,7 +170,22 @@ export default function MeetingReplyView({
         </div>
 
         {/* ── 카드 ── */}
-        <div className="mt-[28px] flex h-[628px] min-h-0 flex-col overflow-hidden rounded-[36px] bg-white px-[32px] pt-[44px] shadow-card">
+        <div
+          ref={cardRef}
+          className="relative mt-[28px] flex h-[628px] min-h-0 flex-col overflow-hidden rounded-[36px] bg-white px-[32px] pt-[44px] shadow-card"
+        >
+          {/* 첫 별 위 안내 말풍선 (Figma 243:6066) — 3초 뒤 사라진다 */}
+          {tipPos && (
+            <div
+              className="pointer-events-none absolute z-20"
+              style={{ top: tipPos.top, left: tipPos.left }}
+            >
+              <div className="absolute bottom-[9px] right-[-14px] whitespace-nowrap rounded-[12px] bg-gray-1000 px-[10px] py-[10px] text-[14px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-100 shadow-card">
+                이중에 정말 좋은 시간이 있다면, ‘좋아요’를 눌러주세요!
+              </div>
+              <div className="absolute bottom-[1px] left-[-6px] size-0 border-x-[6px] border-t-[8px] border-x-transparent border-t-gray-1000" />
+            </div>
+          )}
           {/* 후보 일정 라벨 + 전체 선택 */}
           <div className="flex shrink-0 items-center justify-between">
             <span className="pl-[3px] text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-700">
@@ -196,7 +232,7 @@ export default function MeetingReplyView({
                   </button>
 
                   <div
-                    className={`flex flex-1 items-center gap-[8px] rounded-[22px] px-[24px] py-[18px] transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] ${
+                    className={`flex flex-1 items-center gap-[8px] rounded-[22px] px-[24px] py-[18px] ${
                       allFree ? "bg-[#f5f6ff]" : "border border-gray-400"
                     }`}
                   >
@@ -234,6 +270,7 @@ export default function MeetingReplyView({
 
                     {/* 좋아요 — 카드 안 오른쪽. 안 눌렀을 땐 배경에 은은히 묻힌다. */}
                     <button
+                      ref={index === 0 ? firstStarRef : undefined}
                       type="button"
                       onClick={() => setLiked((prev) => toggle(prev, slot.hour))}
                       aria-pressed={isLiked}
@@ -259,7 +296,7 @@ export default function MeetingReplyView({
                 <button
                   type="button"
                   onClick={() => setExpanded(true)}
-                  className="flex h-[57px] flex-1 items-center justify-center rounded-[22px] border border-gray-400 text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-1000 transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:bg-gray-300/40"
+                  className="flex h-[57px] flex-1 items-center justify-center rounded-[22px] border border-gray-400 text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-1000 transition duration-150 ease-out hover:bg-gray-300/40"
                 >
                   다른 후보 더보기
                 </button>

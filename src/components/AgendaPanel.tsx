@@ -86,12 +86,14 @@ export default function AgendaPanel() {
             toggleRole();
             setNotifOpen(true);
           }}
-          className={`flex h-[42px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-full bg-gray-00 px-[14px] text-[15px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-700 transition duration-150 ease-out hover:scale-[1.04] hover:bg-gray-300/50 active:scale-[0.98] ${
-            nudge ? "animate-bounce" : ""
+          className={`flex h-[42px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-full bg-gray-00 px-[14px] text-[15px] font-semibold leading-[1.6] tracking-[-0.5px] text-black transition duration-150 ease-out hover:scale-[1.04] hover:bg-gray-300/50 active:scale-[0.98] ${
+            nudge ? "animate-nudge-pulse" : ""
           }`}
         >
           <ExchangeIcon size={20} />
-          {role === "organizer" ? "초대자 화면" : "주최자 화면"}
+          <span className="animate-text-shimmer">
+            {role === "organizer" ? "초대자 화면" : "주최자 화면"}
+          </span>
         </button>
       </div>
 
@@ -233,7 +235,7 @@ function AgendaCard({ event, delay }: { event: CalendarEvent; delay: number }) {
         {/* 장소 */}
         {event.location && (
           <div className="flex items-center gap-px text-gray-700">
-            <LocationIcon size={20} />
+            <LocationIcon size={20} className="text-gray-700" />
             <span className="text-[14px] font-semibold leading-[1.3]">
               {event.location}
             </span>
@@ -263,7 +265,7 @@ function AgendaCard({ event, delay }: { event: CalendarEvent; delay: number }) {
                 />
               ))}
             </div>
-            <span className="text-[14px] font-semibold leading-[1.3] text-black">
+            <span className="text-[14px] font-semibold leading-[1.3] text-gray-600">
               +{event.attendeeCount}
             </span>
           </div>
