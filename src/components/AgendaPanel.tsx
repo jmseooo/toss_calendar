@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExchangeIcon, LocationIcon } from "./icons";
 import { useDayView } from "./DayViewContext";
 import { useInvite } from "./InviteContext";
@@ -57,6 +57,13 @@ export default function AgendaPanel() {
   const { setOpen: setNotifOpen } = useNotifPanel();
   const today = useToday();
 
+  // 역할 전환 버튼 밑에 3초간 뜨는 안내 말풍선.
+  const [showRoleTip, setShowRoleTip] = useState(true);
+  useEffect(() => {
+    const t = window.setTimeout(() => setShowRoleTip(false), 3000);
+    return () => window.clearTimeout(t);
+  }, []);
+
   // 전환 버튼이 통통 튀며 "반대편 화면으로 넘어가 보라"고 유도하는 시점:
   //  - 주최자: 참여자 답변을 기다리는 회의가 있으면 → 참여자 화면으로
   //  - 참여자: 답변했지만 아직 확정 안 된 회의가 있으면 → 주최자 화면으로 (확정하러)
@@ -78,7 +85,16 @@ export default function AgendaPanel() {
       {/* 상단 버튼 줄 — 높이 57px은 툴바(min-h-[57px])와 같다. 덕분에 "초대자 화면"
           버튼이 툴바의 "일정 생성하기" 버튼과 세로 중심으로 나란히 놓인다.
           아래 mt-[19px]는 main 의 gap-[19px]와 같은 값. (원래 pt-[76px] = 57 + 19) */}
-      <div className="flex min-h-[57px] items-center">
+      <div className="relative flex min-h-[57px] items-center">
+        {/* 역할 전환 버튼 밑 안내 말풍선 — 3초 뒤 사라진다 */}
+        {showRoleTip && (
+          <div className="pointer-events-none absolute left-0 top-full z-20 mt-[6px] flex flex-col items-start">
+            <div className="ml-[26px] size-0 border-x-[6px] border-b-[7px] border-x-transparent border-b-gray-1000" />
+            <div className="whitespace-nowrap rounded-[12px] bg-gray-1000 px-[10px] py-[10px] text-[14px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-100 shadow-card">
+              화면을 전환해보세요
+            </div>
+          </div>
+        )}
         <button
           type="button"
           onClick={() => {
