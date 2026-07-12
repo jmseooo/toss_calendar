@@ -8,23 +8,22 @@ import {
   type CalendarEvent,
   type EventColor,
 } from "@/data/events";
-import EventChip from "./EventChip";
 import { LocationIcon } from "./icons";
 import { useDayView } from "./DayViewContext";
 import { useWeekView } from "./WeekViewContext";
 import { useInvite } from "./InviteContext";
 import { useToday } from "./TodayContext";
 
-/** 시간 일정 카드: 옅은 채움 배경 */
-const CARD_FILL: Record<EventColor, string> = {
-  blue: "bg-ev-blue-fill",
-  pink: "bg-ev-pink-fill",
-  purple: "bg-ev-purple-fill",
-  red: "bg-ev-red-fill",
-  teal: "bg-ev-teal-fill",
+/** 좌측 색상 바 (line 방식) — 일별 뷰와 같은 -bar 토큰 */
+const BAR: Record<EventColor, string> = {
+  blue: "bg-ev-blue-bar",
+  pink: "bg-ev-pink-bar",
+  purple: "bg-ev-purple-bar",
+  red: "bg-ev-red-bar",
+  teal: "bg-ev-teal-bar",
 };
 
-/** 시간 일정 카드: 제목 텍스트 색 */
+/** 제목 텍스트 색 */
 const CARD_TEXT: Record<EventColor, string> = {
   blue: "text-ev-blue",
   pink: "text-ev-pink",
@@ -72,14 +71,14 @@ export default function WeekGrid() {
         ))}
       </div>
 
-      {/* 날짜 + 종일(블록) 일정 밴드 — 고정 높이로 아래 구분선을 나란히 맞춘다 */}
+      {/* 날짜 줄 (종일 밴드 없음 — 종일 일정은 line 방식으로 아래 컬럼에 함께 표시) */}
       <div className="flex px-[8px] sm:px-[14px]">
         {cells.map((cell) => (
           <WeekHeaderCell key={cell.date} cell={cell} />
         ))}
       </div>
 
-      {/* 종일 영역과 시간 일정 영역을 가르는 구분선 */}
+      {/* 날짜 줄과 일정 영역을 가르는 구분선 */}
       <div className="border-t border-gray-400" />
 
       {/* 요일별 시간 일정 컬럼 */}
@@ -92,14 +91,12 @@ export default function WeekGrid() {
   );
 }
 
-/** 날짜 숫자 + 종일(filled) 일정 칩 — 밴드 한 칸 */
+/** 날짜 숫자 — 밴드 한 칸 (종일 칩 없음) */
 function WeekHeaderCell({ cell }: { cell: DayCell }) {
   const { openDay } = useDayView();
-  const { role } = useInvite();
-  const allDay = eventsByDate(cell.date, role).filter((e) => e.chip === "filled");
 
   return (
-    <div className="flex min-h-[80px] min-w-0 flex-1 flex-col gap-[8px] px-[6px] pb-[10px] pt-[9px]">
+    <div className="flex min-w-0 flex-1 px-[6px] pb-[10px] pt-[9px]">
       {/* 날짜 숫자 (오늘이면 오렌지 원형) — 클릭 시 우측 아젠다를 그 날짜로 연다 */}
       <button
         type="button"
@@ -117,13 +114,6 @@ function WeekHeaderCell({ cell }: { cell: DayCell }) {
           </span>
         )}
       </button>
-
-      {/* 종일 일정 칩 (월간 뷰와 동일한 filled 스타일) */}
-      <div className="flex min-w-0 flex-col gap-[4px]">
-        {allDay.map((ev) => (
-          <EventChip key={ev.id} event={ev} />
-        ))}
-      </div>
     </div>
   );
 }
@@ -151,7 +141,7 @@ function WeekTimedColumn({ cell }: { cell: DayCell }) {
   );
 }
 
-/** 시간 일정 카드 — 시간 · 제목 · 장소 */
+/** 시간 일정 — line 방식(좌측 색상 바 + 시간·제목·장소) */
 function WeekEventCard({
   event,
   justAdded = false,
@@ -165,7 +155,7 @@ function WeekEventCard({
     <button
       type="button"
       onClick={() => openDay(event.date)}
-      className={`relative transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex w-full min-w-0 flex-col items-start gap-[8px] overflow-hidden rounded-[6px] px-[10px] py-[8px] text-left hover:brightness-95 ${CARD_FILL[event.color]} ${
+      className={`group relative flex w-full min-w-0 items-stretch gap-[8px] overflow-hidden rounded-[6px] py-[4px] pl-[3px] pr-[6px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98] hover:bg-gray-300/40 ${
         justAdded ? "animate-block-unfold" : ""
       }`}
     >
@@ -176,27 +166,31 @@ function WeekEventCard({
         />
       )}
 
-      <div className="flex w-full min-w-0 flex-col gap-[2px]">
+      {/* 좌측 색상 바 */}
+      <span
+        className={`w-[3px] shrink-0 self-stretch rounded-full ${BAR[event.color]}`}
+      />
+
+      <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
         {event.startTime && (
-          <p className="truncate text-[13px] font-semibold leading-[1.3] text-gray-1000">
+          <p className="truncate text-[12px] font-semibold leading-[1.3] text-gray-800">
             {event.startTime}~{event.endTime}
           </p>
         )}
         <p
-          className={`truncate text-[15px] font-semibold leading-[1.3] ${CARD_TEXT[event.color]}`}
+          className={`truncate text-[13px] font-semibold leading-[1.3] ${CARD_TEXT[event.color]}`}
         >
           {event.title}
         </p>
+        {event.location && (
+          <div className="flex min-w-0 items-center gap-px text-gray-700">
+            <LocationIcon size={12} className="shrink-0" />
+            <span className="truncate text-[11px] font-semibold leading-[1.3]">
+              {event.location}
+            </span>
+          </div>
+        )}
       </div>
-
-      {event.location && (
-        <div className="flex w-full min-w-0 items-center gap-px text-gray-800">
-          <LocationIcon size={13} className="shrink-0" />
-          <span className="truncate text-[13px] font-semibold leading-[1.3]">
-            {event.location}
-          </span>
-        </div>
-      )}
     </button>
   );
 }

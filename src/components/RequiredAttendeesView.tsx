@@ -6,6 +6,7 @@ import { PEOPLE, SELF } from "@/data/people";
 import { buildDaySlots } from "@/data/schedules";
 import { CheckIcon, CloseIcon, SearchIcon, SendIcon, TrashIcon } from "./icons";
 import { useInvite } from "./InviteContext";
+import CompletionGlow from "./CompletionGlow";
 
 interface RequiredAttendeesViewProps {
   open: boolean;
@@ -159,10 +160,8 @@ export default function RequiredAttendeesView({
   // ── 전송 완료 화면 (Figma 243:7319) — 실제 참석자·주제·날짜로 채움 ──
   if (sent) {
     return (
-      <div
-        className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-auto px-[24px] py-[40px]"
-        style={{ background: "radial-gradient(120% 80% at 50% -10%, #ffe9dd 0%, #ffffff 55%)" }}
-      >
+      <div className="fixed inset-0 z-50 isolate flex flex-col items-center justify-center overflow-hidden bg-white px-[24px] py-[40px]">
+        <CompletionGlow />
         <div className="flex size-[46px] items-center justify-center rounded-full bg-[#ff9364] text-white">
           <CheckIcon size={26} />
         </div>
@@ -482,6 +481,7 @@ export default function RequiredAttendeesView({
           </button>
           <button
             type="button"
+            disabled={participants.length === 0}
             onClick={() => {
               const recommended = visibleSlots.find((s) => s.blockedBy.length === 0);
               sendInvite({
@@ -493,7 +493,7 @@ export default function RequiredAttendeesView({
               });
               setSent(true);
             }}
-            className="flex h-[57px] w-[232px] items-center justify-center gap-[8px] rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95"
+            className="flex h-[57px] w-[232px] items-center justify-center gap-[8px] rounded-[18px] bg-carrot-600 text-[18px] font-semibold leading-[1.6] tracking-[-0.5px] text-white transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] hover:brightness-95 disabled:pointer-events-none disabled:bg-gray-300 disabled:text-gray-600"
           >
             선택 날짜 초대 보내기
             <SendIcon size={20} />

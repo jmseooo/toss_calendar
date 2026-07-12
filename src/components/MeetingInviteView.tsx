@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { PEOPLE } from "@/data/people";
 import { CheckIcon, CloseIcon, SearchIcon, SendIcon } from "./icons";
+import CompletionGlow from "./CompletionGlow";
 import type { ConfirmedMeeting } from "./InviteContext";
 
 interface MeetingInviteViewProps {
@@ -57,13 +58,8 @@ export default function MeetingInviteView({
   // ── 초대 완료 화면 ──
   if (sent) {
     return (
-      <div
-        className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-auto px-[24px] py-[40px]"
-        style={{
-          background:
-            "radial-gradient(120% 80% at 50% -10%, #ffe9dd 0%, #ffffff 55%)",
-        }}
-      >
+      <div className="fixed inset-0 z-50 isolate flex flex-col items-center justify-center overflow-hidden bg-white px-[24px] py-[40px]">
+        <CompletionGlow />
         <div className="flex size-[46px] items-center justify-center rounded-full bg-[#ff9364] text-white">
           <CheckIcon size={26} />
         </div>

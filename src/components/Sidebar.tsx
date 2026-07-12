@@ -64,6 +64,16 @@ export default function Sidebar() {
   const markRead = (k: string) =>
     setReadKeys((prev) => (prev.has(k) ? prev : new Set([...prev, k])));
   const isUnread = (k: string) => !readKeys.has(k);
+  const dot = (key: string) =>
+    isUnread(key) ? <span className={`mt-[2px] ${DOT}`} /> : null;
+
+  // 참여자 뷰에서 함께 받는 "다른 회의의 선택 참여자 초대" 시드 알림.
+  // 참석/미참석만 답할 수 있고, 답하면 그 알림만 읽음 처리된다.
+  const [optionalAnswer, setOptionalAnswer] = useState<
+    "attend" | "decline" | null
+  >(null);
+  // 시드 알림 발생 시각 — 최신순 정렬용. 마운트 시점으로 고정한다.
+  const [seedAt] = useState(() => Date.now());
 
   const replyMtg = meetings.find((m) => m.id === replyMeetingId) ?? null;
   const confirmMtg = meetings.find((m) => m.id === confirmMeetingId) ?? null;
@@ -73,8 +83,6 @@ export default function Sidebar() {
   const items: { key: string; at: number; node: ReactNode }[] = [];
   meetings.forEach((m) => {
     const { info } = m;
-    const dot = (key: string) =>
-      isUnread(key) ? <span className={`mt-[2px] ${DOT}`} /> : null;
 
     if (isInvitee) {
       if (m.reply === null) {
@@ -196,6 +204,67 @@ export default function Sidebar() {
       }
     }
   });
+
+  // 참여자 뷰에선 다른 회의의 "선택 참여자 초대"도 함께 받는다 (Figma 243:5768).
+  // 주최자가 만든 회의 초대와 별개인 시드 알림 — 참석/미참석만 답한다.
+  if (isInvitee) {
+    const key = "opt-design-meeting";
+    items.push({
+      key,
+      at: seedAt,
+      node: (
+        <div className="flex w-full flex-col gap-[8px] rounded-[22px] px-[14px] py-[18px] text-left">
+          <div className="flex flex-col gap-[8px]">
+            <div className="flex items-start gap-[6px]">
+              <span className="size-[24px] shrink-0 rounded-full bg-gray-600" />
+              <span className="text-[18px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
+                참여자
+              </span>
+              {dot(key)}
+            </div>
+            <p className="pl-[2px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-black">
+              ‘디자인 미팅’ 회의 일정에 초대했어요.
+            </p>
+          </div>
+          {optionalAnswer === null ? (
+            <>
+              <p className="pl-[4px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-700">
+                참석 여부를 선택해 답해주세요.
+              </p>
+              <div className="flex w-[226px] gap-[10px]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    markRead(key);
+                    setOptionalAnswer("decline");
+                  }}
+                  className="flex h-[31px] flex-1 items-center justify-center rounded-[8px] bg-[#f3f4f5] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-black transition duration-150 ease-out hover:brightness-95 active:scale-[0.98]"
+                >
+                  미참석
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    markRead(key);
+                    setOptionalAnswer("attend");
+                  }}
+                  className="flex h-[31px] flex-1 items-center justify-center rounded-[8px] bg-carrot-600 text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-white transition duration-150 ease-out hover:brightness-95 active:scale-[0.98]"
+                >
+                  참석
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="pl-[4px] text-[16px] font-semibold leading-[1.3] tracking-[-0.5px] text-gray-600">
+              {optionalAnswer === "attend"
+                ? "‘참석’으로 답했어요."
+                : "‘미참석’으로 답했어요."}
+            </p>
+          )}
+        </div>
+      ),
+    });
+  }
 
   // 발생 시각이 늦은 알림일수록 위로. 같은 시각(한 회의의 답변 도착·확정 가능)은
   // push 순서를 유지하도록 안정 정렬을 쓴다.
