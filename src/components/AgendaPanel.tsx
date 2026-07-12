@@ -50,8 +50,12 @@ const FILLED: Record<EventColor, string> = {
  */
 export default function AgendaPanel() {
   const { selectedDate } = useDayView();
-  const { role, toggleRole } = useInvite();
+  const { role, toggleRole, invite, reply } = useInvite();
   const today = useToday();
+
+  // 주최자가 초대를 보낸 뒤, 아직 참여자 답변이 오기 전까지 전환 버튼이 통통 튀며
+  // "참여자 화면으로 넘어가 보라"고 유도한다.
+  const nudge = invite !== null && role === "organizer" && reply === null;
 
   // 기준 날짜: 월간 그리드에서 고른 날짜, 없으면 오늘.
   // 이 날짜를 맨 위에 두고 그 아래로 "다음 날짜"들을 하루씩 이어 붙인다.
@@ -69,7 +73,9 @@ export default function AgendaPanel() {
         <button
           type="button"
           onClick={toggleRole}
-          className="transition duration-150 ease-out hover:scale-[1.04] active:scale-[0.98] flex h-[42px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-full bg-gray-00 px-[14px] text-[15px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-700 hover:bg-gray-300/50"
+          className={`flex h-[42px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-full bg-gray-00 px-[14px] text-[15px] font-semibold leading-[1.6] tracking-[-0.5px] text-gray-700 transition duration-150 ease-out hover:scale-[1.04] hover:bg-gray-300/50 active:scale-[0.98] ${
+            nudge ? "animate-bounce" : ""
+          }`}
         >
           <ExchangeIcon size={20} />
           {role === "organizer" ? "초대자 화면" : "주최자 화면"}
