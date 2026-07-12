@@ -177,9 +177,9 @@ function WeekEventCard({
       <button
         type="button"
         onClick={() => openDay(event.date)}
-        className={`relative flex min-h-[200px] w-full min-w-0 flex-col gap-[6px] rounded-[6px] bg-gray-00 px-[10px] py-[12px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98] ${
-          justAdded ? "animate-block-unfold" : ""
-        }`}
+        // 카드 스케일 애니메이션은 넣지 않는다 — 커지는 동안 SVG 테두리가 함께
+        // 늘어나 점선 그리기가 흔들리기 때문. 등장 효과는 점선 그리기로 대신한다.
+        className="relative flex min-h-[200px] w-full min-w-0 flex-col gap-[6px] rounded-[6px] bg-gray-00 px-[10px] py-[12px] text-left transition duration-150 ease-out hover:scale-[1.02] active:scale-[0.98]"
       >
         {/* 점선 테두리 — 배경색 획으로 덮었다가 둘레를 한 바퀴 걷어내며 점선을 드러낸다.
             보이는 요소라 CSS 애니메이션이 끝까지(테두리 완성) 확실히 재생된다.
@@ -203,7 +203,9 @@ function WeekEventCard({
             strokeDasharray="4 4"
           />
           {/* 카드 배경색(#fff) 획 — 처음 생길 때 점선을 덮었다가 걷힌다.
-              재생이 끝나면(coverGone) 아예 제거해 네 변이 확실히 남게 한다. */}
+              offset 0 → -1 로 걷어내면 좌상단(경로 시작점)에서 시계방향으로 한 바퀴
+              돌아 다시 좌상단에서 끝난다. SMIL(linear)이라 일정 속도로 매끄럽게 완주하고,
+              재생이 끝나면(coverGone) 덮개를 제거해 네 변을 남긴다. */}
           {justAdded && !coverGone && (
             <rect
               x="0.5"
@@ -217,8 +219,17 @@ function WeekEventCard({
               vectorEffect="non-scaling-stroke"
               pathLength={1}
               strokeDasharray="1 1"
-              className="animate-dash-uncover"
-            />
+              strokeDashoffset={0}
+            >
+              <animate
+                attributeName="stroke-dashoffset"
+                from="0"
+                to="-1"
+                dur="0.7s"
+                calcMode="linear"
+                fill="freeze"
+              />
+            </rect>
           )}
         </svg>
         <div className="flex min-w-0 flex-col gap-[2px]">

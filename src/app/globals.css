@@ -173,20 +173,6 @@
   animation: trace-border 5s linear infinite;
 }
 
-/* 임시(가) 일정 카드 테두리 — 배경색 획이 점선 위를 덮었다가(offset 0) 둘레를
-   한 바퀴 걷히며(offset 1) 점선이 그려지듯 드러난다. 보이는 요소라 CSS 애니메이션이
-   끝까지(offset 1 = 완전 노출) 확실히 재생된다. pathLength=1 정규화. */
-@keyframes dash-uncover {
-  from {
-    stroke-dashoffset: 0;
-  }
-  to {
-    stroke-dashoffset: 1;
-  }
-}
-.animate-dash-uncover {
-  animation: dash-uncover 0.7s ease-out both;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .animate-view-enter,
@@ -195,8 +181,7 @@
   .animate-confirm-glow,
   .animate-agenda-cascade,
   .animate-agenda-fade,
-  .animate-trace-border,
-  .animate-dash-uncover {
+  .animate-trace-border {
     animation: none;
   }
 }
