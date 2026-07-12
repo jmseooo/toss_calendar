@@ -9,7 +9,8 @@ import {
   type CalendarEvent,
   type EventColor,
 } from "@/data/events";
-import { TODAY, addDays, formatAgendaHeading } from "@/lib/calendar";
+import { addDays, formatAgendaHeading } from "@/lib/calendar";
+import { useToday } from "./TodayContext";
 
 /** 아젠다에 보여줄 날짜 수 (선택한 날짜 1 + 다음 2일) */
 const AGENDA_DAY_COUNT = 3;
@@ -50,10 +51,11 @@ const FILLED: Record<EventColor, string> = {
 export default function AgendaPanel() {
   const { selectedDate } = useDayView();
   const { role, toggleRole } = useInvite();
+  const today = useToday();
 
   // 기준 날짜: 월간 그리드에서 고른 날짜, 없으면 오늘.
   // 이 날짜를 맨 위에 두고 그 아래로 "다음 날짜"들을 하루씩 이어 붙인다.
-  const baseDate = selectedDate ?? TODAY;
+  const baseDate = selectedDate ?? today;
   const dates = Array.from({ length: AGENDA_DAY_COUNT }, (_, i) =>
     addDays(baseDate, i),
   );
@@ -134,7 +136,7 @@ function DayCard({
   return (
     <div
       style={{ animationDelay: `${delay}ms` }}
-      className="animate-agenda-fade flex flex-col gap-[8px] rounded-[18px] bg-gray-00 px-[19px] py-[21px] shadow-card"
+      className="animate-agenda-fade flex flex-col gap-[8px] rounded-[18px] bg-gray-00 px-[22px] py-[24px] shadow-card"
     >
       <DayHeading date={date} active={active} delay={delay} />
 
@@ -177,7 +179,7 @@ function AgendaCard({ event, delay }: { event: CalendarEvent; delay: number }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{ animationDelay: `${delay}ms` }}
-      className={`animate-agenda-cascade flex items-stretch gap-[12px] rounded-[18px] py-[8px] pr-[14px] transition-colors ${
+      className={`animate-agenda-cascade flex items-stretch gap-[12px] rounded-[18px] py-[12px] pr-[14px] transition-colors ${
         // 선(바) 일정은 왼쪽으로 조금 밀어 종일 일정과 시선을 맞춘다
         isAllDay ? "pl-[14px]" : "pl-[6px]"
       } ${bg}`}
